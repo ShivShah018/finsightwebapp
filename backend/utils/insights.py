@@ -111,7 +111,7 @@ def cluster_transactions(transactions, n_clusters=3):
     """
     Cluster expense transactions using K-Means.
     Features: amount (scaled), day_of_month, day_of_week, is_weekend.
-    Returns list of {cluster_id, label, count, avg_amount, total, percentage}.
+    Returns list of SpendingCluster data.
     """
     expenses = [t for t in transactions if t.type == "expense"]
     if len(expenses) < n_clusters:
@@ -133,13 +133,15 @@ def cluster_transactions(transactions, n_clusters=3):
     for i, label in enumerate(labels):
         label = int(label)
         if label not in clusters:
-            clusters[label] = {"total": 0, "count": 0, "amounts": []}
-        clusters[label]["total"] += expenses[i].amount
+            clusters[label] = {"total": 0, "count": 0, "amounts": [], "categories": set()}
+        tx = expenses[i]
+        clusters[label]["total"] += tx.amount
         clusters[label]["count"] += 1
-        clusters[label]["amounts"].append(expenses[i].amount)
+        clusters[label]["amounts"].append(tx.amount)
+        if tx.category_name:
+            clusters[label]["categories"].add(tx.category_name)
 
     sorted_clusters = sorted(clusters.items(), key=lambda x: x[1]["total"], reverse=True)
-    total_expense = sum(t.amount for t in expenses)
 
     cluster_names = {
         0: "High Spends",
@@ -153,11 +155,11 @@ def cluster_transactions(transactions, n_clusters=3):
         label_name = cluster_names.get(rank, f"Cluster {rank + 1}")
         results.append({
             "cluster_id": rank,
-            "label": label_name,
+            "name": label_name,
             "count": data["count"],
             "avg_amount": round(avg, 2),
-            "total": round(data["total"], 2),
-            "percentage": round(data["total"] / total_expense * 100, 1),
+            "total_amount": round(data["total"], 2),
+            "categories": sorted(list(data["categories"])),
         })
 
     return results

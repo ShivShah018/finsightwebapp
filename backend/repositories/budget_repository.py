@@ -61,19 +61,22 @@ class BudgetRepository(BaseRepository):
         cursor = self.db.connection.cursor(dictionary=True)
         try:
             cursor.execute(
-                "SELECT b.id, b.monthly_limit, c.name AS category_name, "
+                "SELECT b.id, b.category_id, b.monthly_limit, c.name AS category_name, "
                 "COALESCE(SUM(t.amount), 0) AS spent "
                 "FROM budget_limits b "
                 "JOIN categories c ON b.category_id = c.id "
                 "LEFT JOIN transactions t ON t.category_id = c.id "
                 "AND t.user_id = %s AND t.type = 'expense' AND t.deleted_at IS NULL "
                 "AND YEAR(t.transaction_date) = %s AND MONTH(t.transaction_date) = %s "
-                "WHERE b.user_id = %s GROUP BY b.id, b.monthly_limit, c.name",
+                "WHERE b.user_id = %s GROUP BY b.id, b.category_id, b.monthly_limit, c.name",
                 (user_id, year, month, user_id),
             )
             result = {}
             for r in cursor.fetchall():
                 result[r["category_name"]] = {
+                    "id": r["id"],
+                    "category_id": r["category_id"],
+                    "category_name": r["category_name"],
                     "limit": float(r["monthly_limit"]),
                     "spent": float(r["spent"]),
                     "percentage": round(float(r["spent"]) / float(r["monthly_limit"]) * 100, 1) if float(r["monthly_limit"]) > 0 else 0,

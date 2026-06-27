@@ -125,8 +125,17 @@ export const BudgetService = {
     const params: any = {};
     if (month) params.month = month;
     if (year) params.year = year;
-    const res = await apiClient.get<BudgetUtilization[]>('/budgets/utilization', { params });
-    return res.data;
+    const res = await apiClient.get<any>('/budgets/utilization', { params });
+    if (res.data && !Array.isArray(res.data)) {
+      return Object.values(res.data).map((item: any) => ({
+        category_id: item.id,
+        category_name: item.category_name,
+        monthly_limit: item.limit,
+        spent: item.spent,
+        pct: item.percentage,
+      })) as BudgetUtilization[];
+    }
+    return res.data as BudgetUtilization[];
   },
 
   getSpendingByCategory: async (month?: number, year?: number) => {
@@ -143,8 +152,37 @@ export const AnalyticsService = {
     const params: any = {};
     if (month) params.month = month;
     if (year) params.year = year;
-    const res = await apiClient.get<DashboardSummary>('/dashboard', { params });
-    return res.data;
+    const res = await apiClient.get<any>('/dashboard', { params });
+    const data = res.data;
+    if (data) {
+      if (data.budget_utilization && !Array.isArray(data.budget_utilization)) {
+        data.budget_utilization = Object.values(data.budget_utilization).map((item: any) => ({
+          category_id: item.id,
+          category_name: item.category_name,
+          monthly_limit: item.limit,
+          spent: item.spent,
+          pct: item.percentage,
+        }));
+      }
+      if (data.top_categories) {
+        data.top_categories = data.top_categories.map((cat: any) => ({
+          category_name: cat.name,
+          amount: cat.total,
+          pct: cat.percentage,
+        }));
+      }
+      if (data.largest_expenses) {
+        data.recent_transactions = data.largest_expenses.map((tx: any) => ({
+          id: tx.id,
+          category_name: tx.category_name,
+          amount: tx.amount,
+          type: tx.type || 'expense',
+          description: tx.description || tx.category_name,
+          transaction_date: tx.transaction_date,
+        }));
+      }
+    }
+    return data as DashboardSummary;
   },
 
   getTrends: async (months = 12) => {
@@ -165,8 +203,19 @@ export const AnalyticsService = {
 
 export const InsightService = {
   predict: async () => {
-    const res = await apiClient.get<SpendingPrediction>('/insights/predict');
-    return res.data;
+    const res = await apiClient.get<any>('/insights/predict');
+    const data = res.data;
+    if (data) {
+      return {
+        next_month_prediction: data.predicted_total || 0,
+        confidence_score: data.confidence || 0,
+        trend: data.trend === 'rising' ? 'up' : data.trend === 'falling' ? 'down' : 'stable',
+        message: data.trend === 'insufficient_data' 
+          ? 'Not enough historical data to generate predictions.' 
+          : `We predict your spending will trend ${data.trend} next month.`,
+      } as SpendingPrediction;
+    }
+    return data;
   },
 
   suggestCategory: async (description: string) => {
@@ -182,14 +231,21 @@ export const InsightService = {
   },
 
   getAll: async () => {
-    const res = await apiClient.get<{
-      transactions: Transaction[];
-      goals: Goal[];
-      budgets: Budget[];
-      prediction: SpendingPrediction;
-      clusters: SpendingCluster[];
-    }>('/insights/all');
-    return res.data;
+    const res = await apiClient.get<any>('/insights/all');
+    const data = res.data;
+    if (data) {
+      if (data.prediction) {
+        data.prediction = {
+          next_month_prediction: data.prediction.predicted_total || 0,
+          confidence_score: data.prediction.confidence || 0,
+          trend: data.prediction.trend === 'rising' ? 'up' : data.prediction.trend === 'falling' ? 'down' : 'stable',
+          message: data.prediction.trend === 'insufficient_data' 
+            ? 'Not enough historical data to generate predictions.' 
+            : `We predict your spending will trend ${data.prediction.trend} next month.`,
+        };
+      }
+    }
+    return data;
   },
 };
 

@@ -5,6 +5,7 @@ Handles connections, user auth, categories, transactions & savings goals.
 
 import os
 import hashlib
+import threading
 import mysql.connector
 from mysql.connector import Error
 from dataclasses import dataclass
@@ -97,7 +98,7 @@ class DatabaseManager:
     _instance: Optional["DatabaseManager"] = None
 
     def __init__(self):
-        self._conn: Optional[mysql.connector.MySQLConnection] = None
+        self._local = threading.local()
 
     # ── Connection ─────────────────────────────────────────────
     @classmethod
@@ -107,23 +108,26 @@ class DatabaseManager:
         return cls._instance
 
     def connect(self) -> None:
-        """Open connection if not already open."""
-        if self._conn and self._conn.is_connected():
-            return
-        try:
-            self._conn = mysql.connector.connect(**DB_CONFIG)
-        except Error as e:
-            raise RuntimeError(f"Cannot connect to MySQL: {e}") from e
+        """Open connection if not already open for this thread."""
+        if not hasattr(self._local, "conn") or self._local.conn is None or not self._local.conn.is_connected():
+            try:
+                self._local.conn = mysql.connector.connect(**DB_CONFIG)
+            except Error as e:
+                raise RuntimeError(f"Cannot connect to MySQL: {e}") from e
 
     def disconnect(self) -> None:
-        if self._conn and self._conn.is_connected():
-            self._conn.close()
-            self._conn = None
+        if hasattr(self._local, "conn") and self._local.conn and self._local.conn.is_connected():
+            self._local.conn.close()
+            self._local.conn = None
 
     @property
     def connection(self):
         self.connect()
-        return self._conn
+        return self._local.conn
+
+    @property
+    def _conn(self):
+        return self.connection
 
     # ── Hashing ────────────────────────────────────────────────
     @staticmethod
