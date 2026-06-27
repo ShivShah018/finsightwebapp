@@ -1,0 +1,26 @@
+[project]
+name = "finsight"
+version = "1.0.0"
+description = "Premium personal-finance desktop app — Budget Planner with Savings Goals"
+requires-python = ">=3.13"
+dependencies = [
+    "customtkinter>=5.2.2",
+    "mysql-connector-python>=9.2.0",
+    "matplotlib>=3.10.0",
+    "pillow>=11.1.0",
+    "pytest>=9.1.1",
+    "pyautogui>=0.9.54",
+    "fastapi>=0.138.0",
+    "uvicorn>=0.49.0",
+    "reportlab>=5.0.0",
+    "scikit-learn>=1.9.0",
+    "joblib>=1.5.3",
+    "bcrypt>=4.0.0",
+    "python-jose[cryptography]>=3.3.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+    "pydantic[email]>=2.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/finsight"
