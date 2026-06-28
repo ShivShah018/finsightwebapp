@@ -13,7 +13,16 @@ import toast from 'react-hot-toast';
 export const Settings: React.FC = () => {
   const { user, updateUserCurrency } = useAuth();
   const [currency, setCurrency] = useState(user?.currency || 'INR');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>(
+    () => (document.documentElement.getAttribute('data-theme') as 'dark' | 'light') || 'dark'
+  );
+
+  const toggleTheme = (t: 'dark' | 'light') => {
+    setTheme(t);
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('finsight-theme', t);
+    toast.success(t === 'dark' ? 'Dark theme enabled.' : 'Light theme enabled.');
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,10 +115,7 @@ export const Settings: React.FC = () => {
             </p>
             <div className="flex bg-slate-950 border border-slate-800 rounded-xl p-1">
               <button
-                onClick={() => {
-                  setTheme('dark');
-                  toast.success('Dark theme selected.');
-                }}
+                onClick={() => toggleTheme('dark')}
                 className={`flex-grow py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   theme === 'dark' ? 'bg-slate-800 text-purple-400' : 'text-slate-500 hover:text-slate-300'
                 }`}
@@ -118,10 +124,7 @@ export const Settings: React.FC = () => {
                 Dark Mode
               </button>
               <button
-                onClick={() => {
-                  setTheme('light');
-                  toast.success('Light theme simulated.');
-                }}
+                onClick={() => toggleTheme('light')}
                 className={`flex-grow py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
                   theme === 'light' ? 'bg-slate-800 text-purple-400' : 'text-slate-500 hover:text-slate-300'
                 }`}

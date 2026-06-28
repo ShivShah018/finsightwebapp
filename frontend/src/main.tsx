@@ -26,10 +26,8 @@ createRoot(document.getElementById('root')!).render(
           <Toaster 
             position="top-right"
             toastOptions={{
+              className: 'toaster',
               style: {
-                background: '#0f172a',
-                color: '#f8fafc',
-                border: '1px solid #1e293b',
                 fontSize: '13px',
                 borderRadius: '12px',
               },
