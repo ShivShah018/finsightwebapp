@@ -512,6 +512,7 @@ export const Dashboard: React.FC = () => {
                   </span>
                   <input
                     type="date"
+                    max={new Date().toISOString().split("T")[0]}
                     value={transactionDate}
                     onChange={(e) => setTransactionDate(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 pl-11 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all cursor-pointer"

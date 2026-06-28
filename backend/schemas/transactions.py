@@ -3,6 +3,12 @@ from typing import Optional
 from datetime import date
 
 
+def _not_future(v: date) -> date:
+    if v > date.today():
+        raise ValueError("Transaction date cannot be in the future")
+    return v
+
+
 class TransactionCreate(BaseModel):
     category_id: int
     amount: float = Field(gt=0)
@@ -27,6 +33,11 @@ class TransactionCreate(BaseModel):
         if v not in ("INR", "USD", "NPR"):
             raise ValueError("Currency must be INR, USD, or NPR")
         return v
+
+    @field_validator("transaction_date")
+    @classmethod
+    def validate_date(cls, v: date) -> date:
+        return _not_future(v)
 
 
 class TransactionUpdate(BaseModel):
@@ -53,6 +64,13 @@ class TransactionUpdate(BaseModel):
             v = v.upper()
             if v not in ("INR", "USD", "NPR"):
                 raise ValueError("Currency must be INR, USD, or NPR")
+        return v
+
+    @field_validator("transaction_date")
+    @classmethod
+    def validate_date(cls, v: Optional[date]) -> Optional[date]:
+        if v is not None:
+            return _not_future(v)
         return v
 
 
