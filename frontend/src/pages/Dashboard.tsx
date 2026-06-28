@@ -143,7 +143,7 @@ export const Dashboard: React.FC = () => {
   // Format currency helper
   const fmt = (val: number | null | undefined) => {
     if (val == null) return '';
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹';
+    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
     return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
 
@@ -286,7 +286,7 @@ export const Dashboard: React.FC = () => {
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="month" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹'; return `${sym}${v}`; }} />
+                <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹'; return `${sym}${v}`; }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}

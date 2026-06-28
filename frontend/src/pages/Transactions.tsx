@@ -114,7 +114,7 @@ export const Transactions: React.FC = () => {
   };
 
   const fmt = (val: number) => {
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹';
+    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
     return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
   };
 

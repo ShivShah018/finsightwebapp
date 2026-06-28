@@ -47,7 +47,9 @@
 [data-theme="light"] .bg-slate-900 { background-color: var(--bg-card) !important; }
 [data-theme="light"] .bg-slate-900\/40 { background-color: color-mix(in srgb, var(--bg-card) 40%, transparent) !important; }
 [data-theme="light"] .bg-slate-800 { background-color: var(--bg-tertiary) !important; }
+[data-theme="light"] .bg-slate-950\/80 { background-color: color-mix(in srgb, var(--bg-primary) 60%, transparent) !important; }
 [data-theme="light"] .bg-slate-950\/10 { background-color: color-mix(in srgb, var(--bg-primary) 10%, transparent) !important; }
+[data-theme="light"] .text-white { color: var(--text-primary) !important; }
 [data-theme="light"] .text-slate-100 { color: var(--text-primary) !important; }
 [data-theme="light"] .text-slate-200 { color: var(--text-secondary) !important; }
 [data-theme="light"] .text-slate-300 { color: var(--text-tertiary) !important; }

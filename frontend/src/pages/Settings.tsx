@@ -87,7 +87,7 @@ export const Settings: React.FC = () => {
                 >
                   <option value="INR">INR (₹) - Indian Rupee</option>
                   <option value="USD">USD ($) - US Dollar</option>
-                  <option value="NPR">NPR (₨) - Nepalese Rupee</option>
+                  <option value="NPR">NPR (रु) - Nepalese Rupee</option>
                 </select>
               </div>
             </div>
