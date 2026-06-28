@@ -22,11 +22,11 @@ class GoalService:
     def list_all(self, user_id: int):
         return self.goal_repo.find_by_user(user_id)
 
-    def add_funds(self, goal_id: int, amount: float):
-        self.goal_repo.add_funds(goal_id, amount)
+    def add_funds(self, goal_id: int, user_id: int, amount: float):
+        self.goal_repo.add_funds(goal_id, user_id, amount)
 
-    def complete(self, goal_id: int):
-        self.goal_repo.complete(goal_id)
+    def complete(self, goal_id: int, user_id: int):
+        self.goal_repo.complete(goal_id, user_id)
 
-    def cancel(self, goal_id: int):
-        self.goal_repo.cancel(goal_id)
+    def cancel(self, goal_id: int, user_id: int):
+        self.goal_repo.cancel(goal_id, user_id)

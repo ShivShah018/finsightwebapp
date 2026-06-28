@@ -3,7 +3,7 @@ from typing import Optional
 
 
 class BudgetCreate(BaseModel):
-    category_id: int
+    category_id: int = Field(gt=0)
     monthly_limit: float = Field(gt=0)
 
 

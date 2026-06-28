@@ -100,7 +100,8 @@ export const Transactions: React.FC = () => {
       tx.currency
     ]);
 
-    const csvContent = [headers.join(','), ...rows.map(e => e.map(val => `"${val}"`).join(','))].join('\n');
+    const escapeCsv = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
+    const csvContent = [headers.join(','), ...rows.map(e => e.map(escapeCsv).join(','))].join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -186,11 +187,15 @@ export const Transactions: React.FC = () => {
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs px-3 py-2 rounded-xl focus:outline-none cursor-pointer"
           >
             <option value="">All Months</option>
-            {Array.from({ length: 12 }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {new Date(0, i).toLocaleString('en', { month: 'short' })}
-              </option>
-            ))}
+            {Array.from({ length: 12 }, (_, i) => {
+              const monthNum = i + 1;
+              const isFuture = !!(selectedYear && selectedYear >= new Date().getFullYear() && monthNum > new Date().getMonth() + 1);
+              return (
+                <option key={monthNum} value={monthNum} disabled={isFuture}>
+                  {new Date(0, i).toLocaleString('en', { month: 'short' })}
+                </option>
+              );
+            })}
           </select>
 
           <select
@@ -199,7 +204,12 @@ export const Transactions: React.FC = () => {
             className="bg-slate-950 border border-slate-800 text-slate-300 text-xs px-3 py-2 rounded-xl focus:outline-none cursor-pointer"
           >
             <option value="">All Years</option>
-            {[2024, 2025, 2026, 2027].map(yr => (
+            {(() => {
+              const currentYear = new Date().getFullYear();
+              const years = [];
+              for (let y = currentYear - 3; y <= currentYear; y++) years.push(y);
+              return years;
+            })().map(yr => (
               <option key={yr} value={yr}>{yr}</option>
             ))}
           </select>
@@ -290,7 +300,7 @@ export const Transactions: React.FC = () => {
                   {filtered.map((tx) => (
                     <tr key={tx.id} className="hover:bg-slate-800/30 transition-all">
                       <td className="py-3.5 px-6 font-medium text-slate-400">
-                        {new Date(tx.transaction_date).toLocaleDateString()}
+                        {tx.transaction_date ? new Date(tx.transaction_date).toLocaleDateString() : '-'}
                       </td>
                       <td className="py-3.5 px-6 font-semibold">{tx.category_name}</td>
                       <td className="py-3.5 px-6 text-slate-300 max-w-xs truncate">{tx.description || '-'}</td>

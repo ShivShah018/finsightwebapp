@@ -15,10 +15,14 @@ export const Settings: React.FC = () => {
   const [currency, setCurrency] = useState(user?.currency || 'INR');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateUserCurrency(currency);
-    toast.success('Settings updated successfully!');
+    try {
+      await updateUserCurrency(currency);
+      toast.success('Settings updated successfully!');
+    } catch {
+      toast.error('Failed to save settings.');
+    }
   };
 
   return (

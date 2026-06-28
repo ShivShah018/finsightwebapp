@@ -4,10 +4,10 @@ from datetime import date
 
 
 class GoalCreate(BaseModel):
-    name: str
+    name: str = Field(max_length=120)
     target_amount: float = Field(gt=0)
     deadline: Optional[date] = None
-    auto_fund_amount: float = 0
+    auto_fund_amount: float = Field(default=0, ge=0)
     auto_fund_category_id: Optional[int] = None
 
     @field_validator("name")

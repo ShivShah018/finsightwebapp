@@ -69,7 +69,7 @@ export const Analytics: React.FC = () => {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={trends}>
                 <XAxis dataKey="month" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹'; return `${sym}${v}`; }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}

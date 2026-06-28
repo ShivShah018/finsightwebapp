@@ -33,12 +33,12 @@ class TransactionService:
             raise ValueError("Transaction not found")
         self.tx_repo.update(
             tx_id, user_id,
-            kwargs.get("category_id", existing.category_id),
-            kwargs.get("amount", existing.amount),
-            kwargs.get("type", existing.type),
-            kwargs.get("description", existing.description),
-            kwargs.get("transaction_date", existing.transaction_date),
-            kwargs.get("currency", existing.currency),
+            kwargs.get("category_id") if kwargs.get("category_id") is not None else existing.category_id,
+            kwargs.get("amount") if kwargs.get("amount") is not None else existing.amount,
+            kwargs.get("type") if kwargs.get("type") is not None else existing.type,
+            kwargs.get("description") if kwargs.get("description") is not None else existing.description,
+            kwargs.get("transaction_date") if kwargs.get("transaction_date") is not None else existing.transaction_date,
+            kwargs.get("currency") if kwargs.get("currency") is not None else existing.currency,
         )
 
     def delete(self, tx_id: int, user_id: int, soft: bool = True):

@@ -16,6 +16,8 @@ class AuthService:
         self.secret_key = os.getenv("JWT_SECRET_KEY", "finsight-jwt-secret-change-in-production")
         self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
         self.expiration_minutes = int(os.getenv("JWT_EXPIRATION_MINUTES", "1440"))
+        if self.secret_key == "finsight-jwt-secret-change-in-production":
+            logger.warning("Using default JWT secret key — set JWT_SECRET_KEY in .env for production")
 
     def hash_password(self, password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
@@ -73,5 +75,8 @@ class AuthService:
         payload = self.decode_access_token(token)
         if payload is None:
             return None
-        user_id = int(payload.get("sub"))
+        sub = payload.get("sub")
+        if sub is None:
+            return None
+        user_id = int(sub)
         return self.user_repo.find_by_id(user_id)

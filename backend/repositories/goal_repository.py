@@ -40,34 +40,34 @@ class GoalRepository(BaseRepository):
         finally:
             cursor.close()
 
-    def add_funds(self, goal_id: int, amount: float) -> None:
+    def add_funds(self, goal_id: int, user_id: int, amount: float) -> None:
         cursor = self.db.connection.cursor()
         try:
             cursor.execute(
-                "UPDATE savings_goals SET current_amount = current_amount + %s WHERE id = %s AND status = 'active'",
-                (amount, goal_id),
+                "UPDATE savings_goals SET current_amount = current_amount + %s WHERE id = %s AND user_id = %s AND status = 'active'",
+                (amount, goal_id, user_id),
             )
             self.db.connection.commit()
         finally:
             cursor.close()
 
-    def complete(self, goal_id: int) -> None:
+    def complete(self, goal_id: int, user_id: int) -> None:
         cursor = self.db.connection.cursor()
         try:
             cursor.execute(
-                "UPDATE savings_goals SET status = 'completed', current_amount = target_amount WHERE id = %s",
-                (goal_id,),
+                "UPDATE savings_goals SET status = 'completed', current_amount = target_amount WHERE id = %s AND user_id = %s",
+                (goal_id, user_id),
             )
             self.db.connection.commit()
         finally:
             cursor.close()
 
-    def cancel(self, goal_id: int) -> None:
+    def cancel(self, goal_id: int, user_id: int) -> None:
         cursor = self.db.connection.cursor()
         try:
             cursor.execute(
-                "UPDATE savings_goals SET status = 'cancelled' WHERE id = %s",
-                (goal_id,),
+                "UPDATE savings_goals SET status = 'cancelled' WHERE id = %s AND user_id = %s",
+                (goal_id, user_id),
             )
             self.db.connection.commit()
         finally:

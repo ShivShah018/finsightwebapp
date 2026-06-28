@@ -10,10 +10,10 @@ def _not_future(v: date) -> date:
 
 
 class TransactionCreate(BaseModel):
-    category_id: int
+    category_id: int = Field(gt=0)
     amount: float = Field(gt=0)
     type: str
-    description: Optional[str] = None
+    description: Optional[str] = Field(default=None, max_length=255)
     currency: str = "INR"
     transaction_date: date
     is_bill: bool = False

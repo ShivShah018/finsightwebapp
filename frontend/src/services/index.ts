@@ -128,7 +128,7 @@ export const BudgetService = {
     const res = await apiClient.get<any>('/budgets/utilization', { params });
     if (res.data && !Array.isArray(res.data)) {
       return Object.values(res.data).map((item: any) => ({
-        category_id: item.id,
+        category_id: item.category_id,
         category_name: item.category_name,
         monthly_limit: item.limit,
         spent: item.spent,

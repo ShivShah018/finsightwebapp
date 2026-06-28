@@ -141,7 +141,8 @@ export const Dashboard: React.FC = () => {
   }
 
   // Format currency helper
-  const fmt = (val: number) => {
+  const fmt = (val: number | null | undefined) => {
+    if (val == null) return '';
     const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹';
     return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
   };
@@ -252,7 +253,7 @@ export const Dashboard: React.FC = () => {
               <span className="text-xs font-semibold uppercase tracking-wide">Savings Rate</span>
               <ArrowUpRight className="w-5 h-5 text-blue-400" />
             </div>
-            <p className="text-2xl font-bold text-blue-400">{dashboardData.savings_rate.toFixed(1)}%</p>
+            <p className="text-2xl font-bold text-blue-400">{(dashboardData.savings_rate ?? 0).toFixed(1)}%</p>
           </div>
           <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden mt-4">
             <div 
@@ -285,7 +286,7 @@ export const Dashboard: React.FC = () => {
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="month" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+                <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? '₨' : '₹'; return `${sym}${v}`; }} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
@@ -337,7 +338,7 @@ export const Dashboard: React.FC = () => {
                   <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
                   <span className="text-slate-400">{cat.category_name}</span>
                 </div>
-                <span className="font-semibold text-slate-200">{fmt(cat.amount)} ({cat.pct.toFixed(0)}%)</span>
+                <span className="font-semibold text-slate-200">{fmt(cat.amount)} ({(cat.pct ?? 0).toFixed(0)}%)</span>
               </div>
             ))}
           </div>

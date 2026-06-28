@@ -46,7 +46,7 @@ class AnalyticsService:
             ],
             "budget_utilization": self.budget_repo.get_utilization(user_id, month, year),
             "largest_expenses": largest,
-            "income_expense_ratio": round(income / expense, 2) if expense > 0 else float("inf"),
+            "income_expense_ratio": round(income / expense, 2) if expense > 0 else None,
         }
 
     def get_monthly_trends(self, user_id: int, months: int = 12):

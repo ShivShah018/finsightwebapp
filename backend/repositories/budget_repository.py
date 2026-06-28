@@ -9,6 +9,9 @@ class BudgetRepository(BaseRepository):
     def set_limit(self, user_id: int, category_id: int, monthly_limit: float) -> None:
         cursor = self.db.connection.cursor()
         try:
+            cursor.execute("SELECT id FROM categories WHERE id = %s AND user_id = %s", (category_id, user_id))
+            if not cursor.fetchone():
+                raise ValueError("Category not found or does not belong to this user")
             cursor.execute(
                 "INSERT INTO budget_limits (user_id, category_id, monthly_limit) VALUES (%s, %s, %s) "
                 "ON DUPLICATE KEY UPDATE monthly_limit = %s",

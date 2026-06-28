@@ -301,6 +301,7 @@ export const Goals: React.FC = () => {
                   </span>
                   <input
                     type="date"
+                    min={new Date().toISOString().split("T")[0]}
                     value={deadline}
                     onChange={(e) => setDeadline(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 pl-11 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all cursor-pointer"

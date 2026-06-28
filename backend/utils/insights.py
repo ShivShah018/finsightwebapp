@@ -38,7 +38,9 @@ def train_spending_model(transactions):
 
     slope = model.coef_[0]
     mean_y = np.mean(y)
-    if slope > 0.05 * mean_y:
+    if mean_y == 0:
+        trend = "stable"
+    elif slope > 0.05 * mean_y:
         trend = "rising"
     elif slope < -0.05 * mean_y:
         trend = "falling"

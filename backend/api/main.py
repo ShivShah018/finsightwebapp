@@ -10,6 +10,7 @@ from typing import Optional
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Depends, Query, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -83,6 +84,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc):
+    logger.exception("Unhandled exception: %s", exc)
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal server error"},
+    )
 
 
 # ── Auth ────────────────────────────────────────────────────────
@@ -260,7 +270,7 @@ def create_goal(g: GoalCreate, user=Depends(get_current_user)):
           summary="Add funds to a goal",
           description="Adds money to an existing savings goal's current amount.")
 def fund_goal(goal_id: int, req: GoalFundRequest, user=Depends(get_current_user)):
-    goal_service.add_funds(goal_id, req.amount)
+    goal_service.add_funds(goal_id, user.id, req.amount)
     return {"message": f"Added {req.amount} to goal"}
 
 
@@ -268,7 +278,7 @@ def fund_goal(goal_id: int, req: GoalFundRequest, user=Depends(get_current_user)
           summary="Complete a goal",
           description="Marks a savings goal as completed.")
 def complete_goal(goal_id: int, user=Depends(get_current_user)):
-    goal_service.complete(goal_id)
+    goal_service.complete(goal_id, user.id)
     return {"message": "Goal completed"}
 
 
@@ -276,7 +286,7 @@ def complete_goal(goal_id: int, user=Depends(get_current_user)):
           summary="Cancel a goal",
           description="Cancels a savings goal (hides it from the active list).")
 def cancel_goal(goal_id: int, user=Depends(get_current_user)):
-    goal_service.cancel(goal_id)
+    goal_service.cancel(goal_id, user.id)
     return {"message": "Goal cancelled"}
 
 

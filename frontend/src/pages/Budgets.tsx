@@ -109,6 +109,7 @@ export const Budgets: React.FC = () => {
 
   // Generate budget advisory tips
   const getAdvisoryTip = (spent: number, limit: number, category: string) => {
+    if (limit <= 0) return { text: `${category} — no budget limit set.`, type: 'success' as const };
     const pct = (spent / limit) * 100;
     if (pct > 100) {
       return {
@@ -188,8 +189,8 @@ export const Budgets: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {utilization.map((bud: BudgetUtilization) => {
-            const pct = Math.min((bud.spent / bud.monthly_limit) * 100, 100);
-            const rawPct = (bud.spent / bud.monthly_limit) * 100;
+            const pct = bud.monthly_limit > 0 ? Math.min((bud.spent / bud.monthly_limit) * 100, 100) : 0;
+            const rawPct = bud.monthly_limit > 0 ? (bud.spent / bud.monthly_limit) * 100 : 0;
             const isOverBudget = rawPct > 100;
             const isWarning = rawPct >= 80 && rawPct <= 100;
 
