@@ -48,9 +48,12 @@ class TransactionRepository(BaseRepository):
                 "WHERE t.user_id = %s"
             )
             params = [user_id]
-            if month and year:
-                query += " AND YEAR(t.transaction_date) = %s AND MONTH(t.transaction_date) = %s"
-                params.extend([year, month])
+            if year:
+                query += " AND YEAR(t.transaction_date) = %s"
+                params.append(year)
+                if month:
+                    query += " AND MONTH(t.transaction_date) = %s"
+                    params.append(month)
             query += " AND t.deleted_at IS NULL ORDER BY t.transaction_date DESC, t.created_at DESC LIMIT %s"
             params.append(limit)
             cursor.execute(query, params)
