@@ -42,6 +42,7 @@ export interface Budget {
 }
 
 export interface BudgetUtilization {
+  id: number;
   category_id: number;
   category_name: string;
   monthly_limit: number;

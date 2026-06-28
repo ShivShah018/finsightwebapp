@@ -206,7 +206,7 @@ export const Budgets: React.FC = () => {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => {
-                          setEditingBudget({ id: bud.category_id, category_name: bud.category_name, limit: bud.monthly_limit });
+                          setEditingBudget({ id: bud.id, category_name: bud.category_name, limit: bud.monthly_limit });
                           setEditLimit(bud.monthly_limit.toString());
                         }}
                         className="p-1.5 hover:bg-slate-800 text-slate-400 hover:text-slate-200 rounded-lg transition-all cursor-pointer"
