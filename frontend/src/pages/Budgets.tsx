@@ -239,7 +239,7 @@ export const Budgets: React.FC = () => {
                   <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mb-3">
                     <div 
                       className={`h-full rounded-full transition-all duration-500 ${
-                        isOverBudget ? 'bg-rose-500 animate-pulse' : isWarning ? 'bg-amber-500' : 'bg-purple-600'
+                        isOverBudget ? 'bg-rose-500 animate-pulse' : isWarning ? 'bg-amber-500' : 'bg-emerald-500'
                       }`} 
                       style={{ width: `${pct}%` }}
                     ></div>
