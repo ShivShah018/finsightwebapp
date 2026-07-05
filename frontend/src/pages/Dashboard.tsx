@@ -192,11 +192,15 @@ export const Dashboard: React.FC = () => {
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
               className="bg-transparent border-0 py-1.5 px-3 focus:outline-none cursor-pointer"
             >
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i + 1} value={i + 1} className="bg-slate-950">
-                  {new Date(0, i).toLocaleString('en', { month: 'short' })}
-                </option>
-              ))}
+              {Array.from({ length: 12 }, (_, i) => {
+                const monthNum = i + 1;
+                const isFuture = selectedYear >= new Date().getFullYear() && monthNum > new Date().getMonth() + 1;
+                return (
+                  <option key={monthNum} value={monthNum} disabled={isFuture} className="bg-slate-950">
+                    {new Date(0, i).toLocaleString('en', { month: 'short' })}
+                  </option>
+                );
+              })}
             </select>
             <div className="w-px h-5 bg-slate-800"></div>
             <select 
@@ -204,7 +208,12 @@ export const Dashboard: React.FC = () => {
               onChange={(e) => setSelectedYear(Number(e.target.value))}
               className="bg-transparent border-0 py-1.5 px-3 focus:outline-none cursor-pointer"
             >
-              {[2024, 2025, 2026, 2027].map(yr => (
+              {(() => {
+                const currentYear = new Date().getFullYear();
+                const years = [];
+                for (let y = currentYear - 3; y <= currentYear; y++) years.push(y);
+                return years;
+              })().map(yr => (
                 <option key={yr} value={yr} className="bg-slate-950">{yr}</option>
               ))}
             </select>

@@ -21,8 +21,8 @@ class GoalCreate(BaseModel):
     @field_validator("deadline")
     @classmethod
     def validate_deadline(cls, v: Optional[date]) -> Optional[date]:
-        if v is not None and v <= date.today():
-            raise ValueError("Deadline must be in the future")
+        if v is not None and v < date.today():
+            raise ValueError("Deadline must be today or in the future")
         return v
 
 
