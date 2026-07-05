@@ -1,7 +1,7 @@
 """Monthly PDF report generation and email."""
 import os
 import tempfile
-from datetime import date, timedelta
+from datetime import date
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 from reportlab.lib.styles import getSampleStyleSheet
@@ -76,29 +76,4 @@ def generate_pdf_report(user, transactions, goals, budgets, output_path=None):
     return output_path
 
 
-def send_report_email(smtp_host, smtp_port, smtp_user, smtp_pass,
-                      to_email, pdf_path):
-    """Send the PDF report via email (SMTP)."""
-    import smtplib
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.base import MIMEBase
-    from email.mime.text import MIMEText
-    from email import encoders
 
-    msg = MIMEMultipart()
-    msg["Subject"] = f"FinSight Report - {date.today().strftime('%B %Y')}"
-    msg["From"] = smtp_user
-    msg["To"] = to_email
-    msg.attach(MIMEText("Your monthly FinSight report is attached.", "plain"))
-
-    with open(pdf_path, "rb") as f:
-        part = MIMEBase("application", "octet-stream")
-        part.set_payload(f.read())
-        encoders.encode_base64(part)
-        part.add_header("Content-Disposition", f"attachment; filename={os.path.basename(pdf_path)}")
-        msg.attach(part)
-
-    with smtplib.SMTP(smtp_host, smtp_port) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_pass)
-        server.send_message(msg)

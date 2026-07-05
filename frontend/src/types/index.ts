@@ -34,13 +34,6 @@ export interface Goal {
   progress_pct: number;
 }
 
-export interface Budget {
-  id: number;
-  category_id: number;
-  category_name: string;
-  monthly_limit: number;
-}
-
 export interface BudgetUtilization {
   id: number;
   category_id: number;

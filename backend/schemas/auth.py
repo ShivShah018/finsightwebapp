@@ -44,7 +44,4 @@ class TokenResponse(BaseModel):
     email: str
 
 
-class AuthResponse(BaseModel):
-    user_id: int
-    name: str
-    email: str
+

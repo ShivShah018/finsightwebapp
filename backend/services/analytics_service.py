@@ -1,5 +1,5 @@
 import logging
-from datetime import date, timedelta
+from datetime import date
 from repositories.transaction_repository import TransactionRepository
 from repositories.goal_repository import GoalRepository
 from repositories.budget_repository import BudgetRepository

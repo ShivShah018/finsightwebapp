@@ -3,7 +3,6 @@ import type {
   Transaction, 
   Category, 
   Goal, 
-  Budget, 
   BudgetUtilization, 
   DashboardSummary, 
   SpendingPrediction, 
@@ -19,11 +18,6 @@ export const TransactionService = {
     return res.data;
   },
 
-  getById: async (id: number) => {
-    const res = await apiClient.get<Transaction>(`/transactions/${id}`);
-    return res.data;
-  },
-
   create: async (data: {
     category_id: number;
     amount: number;
@@ -34,11 +28,6 @@ export const TransactionService = {
     is_bill?: boolean;
   }) => {
     const res = await apiClient.post('/transactions', data);
-    return res.data;
-  },
-
-  update: async (id: number, data: Partial<Omit<Transaction, 'id' | 'category_name'>>) => {
-    const res = await apiClient.put(`/transactions/${id}`, data);
     return res.data;
   },
 
@@ -94,11 +83,6 @@ export const GoalService = {
     return res.data;
   },
 
-  cancel: async (id: number) => {
-    const res = await apiClient.post(`/goals/${id}/cancel`);
-    return res.data;
-  },
-
   delete: async (id: number) => {
     const res = await apiClient.delete(`/goals/${id}`);
     return res.data;
@@ -106,11 +90,6 @@ export const GoalService = {
 };
 
 export const BudgetService = {
-  getAll: async () => {
-    const res = await apiClient.get<Budget[]>('/budgets');
-    return res.data;
-  },
-
   setLimit: async (data: { category_id: number; monthly_limit: number }) => {
     const res = await apiClient.post('/budgets', data);
     return res.data;
@@ -144,13 +123,6 @@ export const BudgetService = {
     return res.data as BudgetUtilization[];
   },
 
-  getSpendingByCategory: async (month?: number, year?: number) => {
-    const params: any = {};
-    if (month) params.month = month;
-    if (year) params.year = year;
-    const res = await apiClient.get<{ category_name: string; amount: number }[]>('/budgets/spending', { params });
-    return res.data;
-  },
 };
 
 export const AnalyticsService = {
@@ -198,13 +170,6 @@ export const AnalyticsService = {
     return res.data;
   },
 
-  getSummary: async (month?: number, year?: number) => {
-    const params: any = {};
-    if (month) params.month = month;
-    if (year) params.year = year;
-    const res = await apiClient.get<{ total_income: number; total_expense: number; net_savings: number }>('/analytics/summary', { params });
-    return res.data;
-  },
 };
 
 export const InsightService = {
@@ -236,23 +201,6 @@ export const InsightService = {
     return res.data;
   },
 
-  getAll: async () => {
-    const res = await apiClient.get<any>('/insights/all');
-    const data = res.data;
-    if (data) {
-      if (data.prediction) {
-        data.prediction = {
-          next_month_prediction: data.prediction.predicted_total || 0,
-          confidence_score: data.prediction.confidence || 0,
-          trend: data.prediction.trend === 'rising' ? 'up' : data.prediction.trend === 'falling' ? 'down' : 'stable',
-          message: data.prediction.trend === 'insufficient_data' 
-            ? 'Not enough historical data to generate predictions.' 
-            : `We predict your spending will trend ${data.prediction.trend} next month.`,
-        };
-      }
-    }
-    return data;
-  },
 };
 
 export const ReportService = {

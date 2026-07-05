@@ -19,11 +19,10 @@ from services.transaction_service import TransactionService
 from services.goal_service import GoalService
 from services.budget_service import BudgetService
 from services.analytics_service import AnalyticsService
-from schemas.auth import AuthRequest, RegisterRequest, TokenResponse
+from schemas.auth import AuthRequest, RegisterRequest
 from schemas.transactions import TransactionCreate, TransactionUpdate, TransactionResponse, TransactionListResponse
-from schemas.goals import GoalCreate, GoalResponse, GoalFundRequest
-from schemas.budgets import BudgetCreate, BudgetResponse, BudgetUpdate
-from schemas.analytics import DashboardSummary
+from schemas.goals import GoalCreate, GoalFund
+from schemas.budgets import BudgetCreate, BudgetUpdate, BudgetUtilization
 from utils.config_manager import load_env
 from utils.currency import get_rates, SYMBOLS, CURRENCY_NAMES, get_conversion_note
 

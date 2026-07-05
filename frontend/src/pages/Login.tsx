@@ -9,7 +9,6 @@ import { TrendingUp, KeyRound, Mail } from 'lucide-react';
 const loginSchema = z.object({
   email: z.string().trim().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  rememberMe: z.boolean().optional(),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -26,13 +25,12 @@ export const Login: React.FC = () => {
     defaultValues: {
       email: '',
       password: '',
-      rememberMe: false,
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      await login(data.email, data.password, data.rememberMe);
+      await login(data.email, data.password);
     } catch (e) {
       // Errors handled by AuthContext toasts
     }
@@ -106,17 +104,7 @@ export const Login: React.FC = () => {
             )}
           </div>
 
-          {/* Remember Me checkbox */}
-          <div className="flex items-center justify-between py-1">
-            <label className="flex items-center gap-2 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                {...register('rememberMe')}
-                className="w-4 h-4 rounded bg-slate-950 border-slate-800 text-purple-600 focus:ring-0 focus:ring-offset-0"
-              />
-              <span className="text-xs text-slate-400">Remember me</span>
-            </label>
-          </div>
+
 
           {/* Submit Button */}
           <button
