@@ -26,6 +26,7 @@ import {
   Pie, 
 } from 'recharts';
 import toast from 'react-hot-toast';
+import { tooltipStyle, tooltipLabelStyle } from '../utils/theme';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
@@ -293,11 +294,11 @@ export const Dashboard: React.FC = () => {
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={allMonths}>
-                <XAxis dataKey="month" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => convertCurrency(v, cur, rates)} />
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => convertCurrency(v, cur, rates)} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
-                  labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
+                  contentStyle={tooltipStyle()}
+                  labelStyle={tooltipLabelStyle()}
                   formatter={(value: any) => convertCurrency(Number(value) || 0, cur, rates)}
                 />
                 <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
@@ -336,7 +337,7 @@ export const Dashboard: React.FC = () => {
                     ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
+                    contentStyle={tooltipStyle()}
                     itemStyle={{ color: '#fff' }}
                   />
                 </PieChart>

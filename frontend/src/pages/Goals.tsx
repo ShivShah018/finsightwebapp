@@ -152,7 +152,7 @@ export const Goals: React.FC = () => {
         </div>
       ) : !goals || goals.length === 0 ? (
         <div className="py-20 text-center text-slate-500 text-sm">
-          No active savings goals found. Click "New Goal" above to configure savings objectives.
+          No savings goals found. Click "New Goal" above to configure savings objectives.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

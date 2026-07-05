@@ -14,6 +14,7 @@ import {
   ResponsiveContainer, 
 } from 'recharts';
 import { Brain, AlertCircle } from 'lucide-react';
+import { tooltipStyle, tooltipLabelStyle } from '../utils/theme';
 
 export const Analytics: React.FC = () => {
   const { user } = useAuth();
@@ -84,8 +85,8 @@ export const Analytics: React.FC = () => {
                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v, cur, rates, 'INR')} />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
-                  labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
+                  contentStyle={tooltipStyle()}
+                  labelStyle={tooltipLabelStyle()}
                   formatter={(value) => fmt(Number(value) || 0, cur, rates, 'INR')}
                 />
                 <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
