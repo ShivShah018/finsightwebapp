@@ -299,6 +299,7 @@ export const Dashboard: React.FC = () => {
                 <Tooltip 
                   contentStyle={tooltipStyle()}
                   labelStyle={tooltipLabelStyle()}
+                  itemStyle={{ color: 'inherit' }}
                   formatter={(value: any) => convertCurrency(Number(value) || 0, cur, rates)}
                 />
                 <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
@@ -338,7 +339,8 @@ export const Dashboard: React.FC = () => {
                   </Pie>
                   <Tooltip 
                     contentStyle={tooltipStyle()}
-                    itemStyle={{ color: '#fff' }}
+                    labelStyle={tooltipLabelStyle()}
+                    itemStyle={{ color: 'inherit' }}
                   />
                 </PieChart>
               </ResponsiveContainer>

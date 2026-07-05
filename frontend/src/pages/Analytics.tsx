@@ -87,6 +87,7 @@ export const Analytics: React.FC = () => {
                 <Tooltip 
                   contentStyle={tooltipStyle()}
                   labelStyle={tooltipLabelStyle()}
+                  itemStyle={{ color: 'inherit' }}
                   formatter={(value) => fmt(Number(value) || 0, cur, rates, 'INR')}
                 />
                 <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
