@@ -17,6 +17,7 @@ __pycache__/
 *$py.class
 *.egg-info/
 *.egg/
+*.whl
 
 # Node dependencies
 node_modules/
@@ -38,6 +39,8 @@ env/
 .env
 .env.local
 .env.*.local
+.env.development
+.env.production
 
 # Package manager lock files (auto-generated)
 backend/uv.lock
@@ -57,3 +60,6 @@ backend/uv.lock
 *.njsproj
 *.sln
 *.sw?
+
+# Runtime logs
+server_*.txt

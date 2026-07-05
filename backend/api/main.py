@@ -21,8 +21,8 @@ from services.budget_service import BudgetService
 from services.analytics_service import AnalyticsService
 from schemas.auth import AuthRequest, RegisterRequest
 from schemas.transactions import TransactionCreate, TransactionUpdate, TransactionResponse, TransactionListResponse
-from schemas.goals import GoalCreate, GoalFund
-from schemas.budgets import BudgetCreate, BudgetUpdate, BudgetUtilization
+from schemas.goals import GoalCreate, GoalFundRequest
+from schemas.budgets import BudgetCreate, BudgetUpdate
 from utils.config_manager import load_env
 from utils.currency import get_rates, SYMBOLS, CURRENCY_NAMES, get_conversion_note
 
@@ -231,7 +231,7 @@ def get_deleted_transactions(user=Depends(get_current_user)):
 @app.get("/categories",
          summary="List categories",
          description="Returns all categories for the authenticated user. Filter by type (income/expense).")
-def list_categories(type: Optional[str] = Query(None, regex="^(income|expense)?$"), user=Depends(get_current_user)):
+def list_categories(type: Optional[str] = Query(None, pattern="^(income|expense)?$"), user=Depends(get_current_user)):
     cats = tx_service.get_categories(user.id, type)
     return [{"id": c.id, "name": c.name, "type": c.type, "icon": c.icon, "color": c.color} for c in cats]
 

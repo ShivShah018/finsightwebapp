@@ -45,7 +45,7 @@ Frontend (React SPA)  ──HTTP──>  FastAPI API  ──>  Services  ──>
 - **`api/`** — Route handlers and request validation (Pydantic)
 - **`services/`** — Business logic layer
 - **`repositories/`** — Data access layer
-- **`utils/`** — ML models, PDF generator, currency rates, recurring logic
+- **`utils/`** — ML models, PDF generator, currency rates, exchange rates
 
 ---
 
@@ -58,6 +58,7 @@ finsightwebapp/
 │   │   ├── api/               # Axios HTTP client with JWT interceptors
 │   │   ├── components/        # Protected/Auth routes, Layout, Sidebar
 │   │   ├── contexts/          # AuthContext (persistent sessions)
+│   │   ├── hooks/             # Custom hooks (useRates)
 │   │   ├── pages/             # Dashboard, Transactions, Categories, Budgets, Goals, Analytics, Settings
 │   │   ├── services/          # API service functions
 │   │   ├── types/             # TypeScript interfaces
@@ -176,6 +177,39 @@ uvicorn api.main:app --host 127.0.0.1 --port 8000 --reload
 cd frontend
 npm run dev
 ```
+
+---
+
+## API Overview
+
+| Endpoint                    | Method | Description                               |
+|-----------------------------|--------|-------------------------------------------|
+| `/auth/register`            | POST   | Create a new user account                 |
+| `/auth/login`               | POST   | Authenticate and receive JWT              |
+| `/auth/me`                  | GET    | Get current user profile                  |
+| `/transactions`             | GET    | List transactions (filterable)            |
+| `/transactions`             | POST   | Create a transaction                      |
+| `/transactions/{id}`        | PUT    | Update a transaction                      |
+| `/transactions/{id}`        | DELETE | Soft/hard delete a transaction            |
+| `/categories`               | GET    | List categories                           |
+| `/goals`                    | GET    | List savings goals                        |
+| `/goals`                    | POST   | Create a savings goal                     |
+| `/goals/{id}/fund`          | POST   | Add funds to a goal                       |
+| `/goals/{id}/complete`      | POST   | Mark goal as completed                    |
+| `/goals/{id}`               | DELETE | Permanently delete a goal                 |
+| `/budgets`                  | POST   | Set a budget limit per category           |
+| `/budgets/{id}`             | PUT    | Update a budget limit                     |
+| `/budgets/{id}`             | DELETE | Remove a budget limit                     |
+| `/budgets/utilization`      | GET    | Get budget spending vs limit              |
+| `/dashboard`                | GET    | Full dashboard summary (stats + trends)   |
+| `/analytics/trends`         | GET    | Monthly income/expense trends             |
+| `/insights/predict`         | GET    | Linear regression spending prediction     |
+| `/insights/cluster`         | GET    | K-Means spending behavior clusters        |
+| `/insights/suggest-category`| GET    | ML-based category suggestion              |
+| `/report/generate`          | POST   | Generate monthly PDF report               |
+| `/currency/rates`           | GET    | Live exchange rates                       |
+
+Full interactive docs at `http://localhost:8000/docs`.
 
 ---
 
