@@ -66,8 +66,8 @@ export const Analytics: React.FC = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-white tracking-tight">Analytics & AI Insights</h1>
-        <p className="text-sm text-slate-400">Discover long-term cashflow patterns and ML-clustered spending behaviors.</p>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight">Analytics & Insights</h1>
+        <p className="text-sm text-slate-400">Discover long-term cashflow patterns and spending behaviors.</p>
       </div>
 
       {/* Cashflow monthly difference chart */}
@@ -101,20 +101,20 @@ export const Analytics: React.FC = () => {
         </div>
       </div>
 
-      {/* Spending Behavior Groups (K-Means Clustering) */}
+      {/* Spending Behavior Groups */}
       <div className="space-y-4">
         <div className="flex items-center gap-2">
           <Brain className="w-5 h-5 text-purple-400" />
           <h3 className="text-base font-bold text-slate-200">Spending Behavior Groups</h3>
         </div>
         <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
-          K-Means clustering groups your monthly transactions into categories based on spending frequency and average transaction sizes.
+          Groups your monthly spending into behavioral categories based on frequency and average transaction sizes.
         </p>
 
         {!clusters || clusters.length === 0 ? (
           <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl text-center text-slate-500 text-xs">
             <AlertCircle className="w-8 h-8 mx-auto mb-2 text-slate-600 animate-pulse" />
-            Not enough data to calculate spending clusters. Please add more transaction history across multiple dates.
+            Not enough data to identify spending groups. Add more transaction history across multiple months.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

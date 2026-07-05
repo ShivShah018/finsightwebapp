@@ -409,17 +409,17 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* AI Predict / Insights Card */}
+        {/* Spending Prediction Card */}
         <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">AI Spending Prediction</h3>
-            <p className="text-xs text-slate-500">AI prediction for next month's spending patterns.</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Spending Forecast</h3>
+            <p className="text-xs text-slate-500">Estimated spending range for next month based on your transaction history.</p>
           </div>
           <div className="py-6 flex flex-col items-center justify-center text-center">
             {prediction ? (
               <div className="space-y-4">
                 <span className="text-xs font-semibold text-purple-400 uppercase tracking-widest bg-purple-500/10 px-3 py-1.5 rounded-full">
-                  Linear Regression Output
+                  Predicted Spending
                 </span>
                 <p className="text-3xl font-extrabold text-white mt-2">
                   {fmt(prediction.next_month_prediction)}
@@ -443,7 +443,7 @@ export const Dashboard: React.FC = () => {
           </div>
           <div className="p-3 bg-slate-950 border border-slate-800/50 rounded-xl">
             <p className="text-[10px] text-slate-500 leading-normal">
-              Predictions are powered by a local linear model trained on your transaction dates and monthly aggregations.
+              Forecast is based on your historical spending patterns and monthly trends.
             </p>
           </div>
         </div>

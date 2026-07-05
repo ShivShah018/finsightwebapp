@@ -182,8 +182,8 @@ export const InsightService = {
         confidence_score: data.confidence || 0,
         trend: data.trend === 'rising' ? 'up' : data.trend === 'falling' ? 'down' : 'stable',
         message: data.trend === 'insufficient_data' 
-          ? 'Not enough historical data to generate predictions.' 
-          : `We predict your spending will trend ${data.trend} next month.`,
+          ? 'Not enough historical data for a forecast.' 
+          : `Your spending is expected to ${data.trend === 'rising' ? 'increase' : data.trend === 'falling' ? 'decrease' : 'remain stable'} next month.`,
       } as SpendingPrediction;
     }
     return data;

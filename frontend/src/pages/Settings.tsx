@@ -5,24 +5,12 @@ import {
   Globe, 
   Check, 
   ShieldAlert,
-  Moon,
-  Sun
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export const Settings: React.FC = () => {
   const { user, updateUserCurrency } = useAuth();
   const [currency, setCurrency] = useState(user?.currency || 'INR');
-  const [theme, setTheme] = useState<'dark' | 'light'>(
-    () => (document.documentElement.getAttribute('data-theme') as 'dark' | 'light') || 'dark'
-  );
-
-  const toggleTheme = (t: 'dark' | 'light') => {
-    setTheme(t);
-    document.documentElement.setAttribute('data-theme', t);
-    localStorage.setItem('finsight-theme', t);
-    toast.success(t === 'dark' ? 'Dark theme enabled.' : 'Light theme enabled.');
-  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +27,7 @@ export const Settings: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-3xl font-extrabold text-white tracking-tight">Settings</h1>
-        <p className="text-sm text-slate-400">Configure your personal preferences, preferred currency, and interface settings.</p>
+        <p className="text-sm text-slate-400">Configure your personal preferences and preferred currency.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -105,36 +93,6 @@ export const Settings: React.FC = () => {
 
         {/* Right Info Box */}
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300 flex items-center gap-2">
-              <Sun className="w-4 h-4 text-purple-400" />
-              <span>App Theme</span>
-            </h3>
-            <p className="text-xs text-slate-500">
-              Customize the look of the dashboard interface.
-            </p>
-            <div className="flex bg-slate-950 border border-slate-800 rounded-xl p-1">
-              <button
-                onClick={() => toggleTheme('dark')}
-                className={`flex-grow py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  theme === 'dark' ? 'bg-slate-800 text-purple-400' : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                <Moon className="w-4 h-4" />
-                Dark Mode
-              </button>
-              <button
-                onClick={() => toggleTheme('light')}
-                className={`flex-grow py-2 text-xs font-semibold rounded-lg flex items-center justify-center gap-2 transition-all cursor-pointer ${
-                  theme === 'light' ? 'bg-slate-800 text-purple-400' : 'text-slate-500 hover:text-slate-300'
-                }`}
-              >
-                <Sun className="w-4 h-4" />
-                Light Mode
-              </button>
-            </div>
-          </div>
-
           <div className="bg-slate-900/40 border border-rose-500/10 p-6 rounded-2xl shadow-xl space-y-3">
             <div className="flex items-center gap-2 text-rose-400">
               <ShieldAlert className="w-5 h-5" />
