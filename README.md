@@ -2,6 +2,10 @@
 
 FinSight is a full-stack personal finance web application with AI-powered analytics. It features a React SPA frontend styled with Tailwind CSS v4 and a FastAPI backend with MySQL.
 
+## Problem Statement
+
+Managing personal finances effectively requires tracking income, expenses, budgets, and savings goals across multiple dimensions. Most solutions lack intelligent insights into spending patterns. FinSight bridges this gap by combining transaction management, budget enforcement, goal tracking, and ML-driven analytics (spending prediction via Linear Regression and behavioral clustering via K-Means) into a single, modern web application.
+
 ---
 
 ## Features
@@ -144,6 +148,7 @@ Open `http://localhost:5173` in your browser.
 | Variable                | Description                | Default                             |
 |-------------------------|----------------------------|-------------------------------------|
 | `FINSIGHT_DB_HOST`      | MySQL host                 | `localhost`                         |
+| `FINSIGHT_DB_PORT`      | MySQL port                 | `3306`                              |
 | `FINSIGHT_DB_USER`      | MySQL user                 | `root`                              |
 | `FINSIGHT_DB_PASSWORD`  | MySQL password             |                                     |
 | `FINSIGHT_DB_NAME`      | MySQL database name        | `finsight`                          |
@@ -227,7 +232,16 @@ The `/insights/cluster` endpoint uses `sklearn.cluster.KMeans` to group expense 
 
 ## Screenshots
 
-*(Screenshots to be added)*
+| Screen           | Preview                                                  |
+|------------------|----------------------------------------------------------|
+| **Login**        | `screenshots/login.png` — JWT authentication form        |
+| **Dashboard**    | `screenshots/dashboard.png` — Summary cards + cashflow bar chart + expense pie chart + AI prediction |
+| **Transactions** | `screenshots/transactions.png` — Searchable, filterable transaction ledger with soft-delete |
+| **Budgets**      | `screenshots/budgets.png` — Monthly budget cards with progress bars and spending alerts |
+| **Goals**        | `screenshots/goals.png` — Savings goal cards with fund and complete actions |
+| **Analytics**    | `screenshots/analytics.png` — 12-month cashflow bar chart + K-Means spending clusters |
+| **Settings**     | `screenshots/settings.png` — Currency and theme (dark/light) preferences |
+| **Dark Mode**    | `screenshots/dark-mode.png` — Application with dark theme enabled |
 
 ---
 
@@ -251,3 +265,20 @@ Build the frontend and serve it from the backend or a static host:
 cd frontend
 npm run build
 ```
+
+---
+
+## Future Improvements
+
+- **Recurring Transactions** — Automated bill detection and recurring income/expense scheduling
+- **Email Reports** — Scheduled PDF delivery via SendGrid/SMTP
+- **Multi-Account Support** — Link external bank accounts via Plaid API
+- **Budget Rollovers** — Carry forward unused budget to the next month
+- **Advanced ML** — Anomaly detection for fraudulent transactions, LSTM-based forecasting
+- **PWA Support** — Offline access via service workers and IndexedDB caching
+
+---
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
