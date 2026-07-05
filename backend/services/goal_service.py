@@ -31,5 +31,10 @@ class GoalService:
     def cancel(self, goal_id: int, user_id: int):
         self.goal_repo.cancel(goal_id, user_id)
 
+    def update(self, goal_id: int, user_id: int, name: Optional[str] = None,
+               target_amount: Optional[float] = None,
+               deadline: Optional[date] = None):
+        self.goal_repo.update(goal_id, user_id, name, target_amount, deadline)
+
     def delete(self, goal_id: int, user_id: int):
         self.goal_repo.delete(goal_id, user_id)

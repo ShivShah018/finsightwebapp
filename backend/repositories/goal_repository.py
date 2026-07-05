@@ -84,6 +84,33 @@ class GoalRepository(BaseRepository):
         finally:
             cursor.close()
 
+    def update(self, goal_id: int, user_id: int, name: Optional[str] = None,
+               target_amount: Optional[float] = None,
+               deadline: Optional[date] = None) -> None:
+        cursor = self.db.connection.cursor()
+        try:
+            fields = []
+            values = []
+            if name is not None:
+                fields.append("name = %s")
+                values.append(name)
+            if target_amount is not None:
+                fields.append("target_amount = %s")
+                values.append(target_amount)
+            if deadline is not None:
+                fields.append("deadline = %s")
+                values.append(deadline)
+            if not fields:
+                return
+            values.extend([goal_id, user_id])
+            cursor.execute(
+                f"UPDATE savings_goals SET {', '.join(fields)} WHERE id = %s AND user_id = %s",
+                values,
+            )
+            self.db.connection.commit()
+        finally:
+            cursor.close()
+
     def set_auto_fund(self, goal_id: int, user_id: int,
                        amount: float, category_id: Optional[int] = None) -> None:
         cursor = self.db.connection.cursor()

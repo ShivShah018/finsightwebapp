@@ -21,7 +21,7 @@ from services.budget_service import BudgetService
 from services.analytics_service import AnalyticsService
 from schemas.auth import AuthRequest, RegisterRequest
 from schemas.transactions import TransactionCreate, TransactionUpdate, TransactionResponse, TransactionListResponse
-from schemas.goals import GoalCreate, GoalFundRequest
+from schemas.goals import GoalCreate, GoalUpdate, GoalFundRequest, GoalResponse
 from schemas.budgets import BudgetCreate, BudgetUpdate
 from utils.config_manager import load_env
 from utils.currency import get_rates, SYMBOLS, CURRENCY_NAMES, get_conversion_note
@@ -262,6 +262,17 @@ def create_goal(g: GoalCreate, user=Depends(get_current_user)):
             g.auto_fund_amount, g.auto_fund_category_id,
         )
         return {"id": gid, "message": "Goal created"}
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@app.put("/goals/{goal_id}",
+         summary="Update a savings goal",
+         description="Updates name, target amount, or deadline of an existing goal.")
+def update_goal(goal_id: int, g: GoalUpdate, user=Depends(get_current_user)):
+    try:
+        goal_service.update(goal_id, user.id, g.name, g.target_amount, g.deadline)
+        return {"message": "Goal updated"}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 

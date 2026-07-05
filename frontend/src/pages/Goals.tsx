@@ -12,7 +12,8 @@ import {
   Calendar,
   AlertCircle,
   TrendingUp,
-  Award
+  Award,
+  Edit
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -24,6 +25,10 @@ export const Goals: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [fundingGoal, setFundingGoal] = useState<{ id: number; name: string } | null>(null);
   const [deletingGoal, setDeletingGoal] = useState<{ id: number; name: string } | null>(null);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [editName, setEditName] = useState('');
+  const [editTargetAmount, setEditTargetAmount] = useState('');
+  const [editDeadline, setEditDeadline] = useState('');
 
   // Form states
   const [name, setName] = useState('');
@@ -85,6 +90,18 @@ export const Goals: React.FC = () => {
     },
     onError: () => {
       toast.error('Failed to delete goal.');
+    }
+  });
+
+  const updateGoalMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => GoalService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['goals'] });
+      toast.success('Savings goal updated!');
+      setEditingGoal(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.detail || 'Failed to update goal.');
     }
   });
 
@@ -243,6 +260,18 @@ export const Goals: React.FC = () => {
                     )}
                     
                     <button
+                      onClick={() => {
+                        setEditingGoal(goal);
+                        setEditName(goal.name);
+                        setEditTargetAmount(goal.target_amount.toString());
+                        setEditDeadline(goal.deadline || '');
+                      }}
+                      className="p-1.5 hover:bg-purple-500/10 text-purple-400 rounded-lg transition-all cursor-pointer"
+                      title="Edit Goal"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
                       onClick={() => setDeletingGoal({ id: goal.id, name: goal.name })}
                       className="p-1.5 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
                       title="Delete Goal"
@@ -377,7 +406,6 @@ export const Goals: React.FC = () => {
             </div>
 
             <form onSubmit={handleFundSubmit} className="space-y-4">
-              {/* Deposit amount */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Amount to add</label>
                 <input
@@ -389,7 +417,6 @@ export const Goals: React.FC = () => {
                 />
               </div>
 
-              {/* Submit button */}
               <button
                 type="submit"
                 disabled={fundGoalMutation.isPending}
@@ -399,6 +426,93 @@ export const Goals: React.FC = () => {
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   'Confirm Deposit'
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Goal Modal */}
+      {editingGoal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Edit Savings Goal</h3>
+              <button 
+                onClick={() => setEditingGoal(null)}
+                className="text-slate-500 hover:text-slate-300 text-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!editName.trim()) {
+                toast.error('Please enter a goal name.');
+                return;
+              }
+              if (!editTargetAmount || isNaN(Number(editTargetAmount)) || Number(editTargetAmount) <= 0) {
+                toast.error('Please enter a valid positive target amount.');
+                return;
+              }
+              updateGoalMutation.mutate({
+                id: editingGoal.id,
+                data: {
+                  name: editName.trim(),
+                  target_amount: Number(editTargetAmount),
+                  deadline: editDeadline || undefined,
+                },
+              });
+            }} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Goal Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. New Macbook Pro / Car Fund"
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Target Amount</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 150000"
+                  value={editTargetAmount}
+                  onChange={(e) => setEditTargetAmount(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Target Deadline (Optional)</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                    <Calendar className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="date"
+                    min={new Date().toISOString().split("T")[0]}
+                    value={editDeadline}
+                    onChange={(e) => setEditDeadline(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 pl-11 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateGoalMutation.isPending}
+                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-purple-600/10 flex items-center justify-center"
+              >
+                {updateGoalMutation.isPending ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  'Save Changes'
                 )}
               </button>
             </form>

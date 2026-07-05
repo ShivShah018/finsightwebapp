@@ -36,6 +36,18 @@ export const TransactionService = {
     return res.data;
   },
 
+  update: async (id: number, data: {
+    category_id?: number;
+    amount?: number;
+    type?: 'income' | 'expense';
+    description?: string;
+    currency?: string;
+    transaction_date?: string;
+  }) => {
+    const res = await apiClient.put(`/transactions/${id}`, data);
+    return res.data;
+  },
+
   restore: async (id: number) => {
     const res = await apiClient.post(`/transactions/${id}/restore`);
     return res.data;
@@ -75,6 +87,15 @@ export const GoalService = {
 
   fund: async (id: number, amount: number) => {
     const res = await apiClient.post(`/goals/${id}/fund`, { amount });
+    return res.data;
+  },
+
+  update: async (id: number, data: {
+    name?: string;
+    target_amount?: number;
+    deadline?: string;
+  }) => {
+    const res = await apiClient.put(`/goals/${id}`, data);
     return res.data;
   },
 

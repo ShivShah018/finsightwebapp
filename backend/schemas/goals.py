@@ -36,5 +36,27 @@ class GoalResponse(BaseModel):
     progress_pct: float = 0.0
 
 
+class GoalUpdate(BaseModel):
+    name: Optional[str] = Field(default=None, max_length=120)
+    target_amount: Optional[float] = Field(default=None, gt=0)
+    deadline: Optional[date] = None
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v = v.strip()
+            if len(v) < 1:
+                raise ValueError("Goal name cannot be empty")
+        return v
+
+    @field_validator("deadline")
+    @classmethod
+    def validate_deadline(cls, v: Optional[date]) -> Optional[date]:
+        if v is not None and v < date.today():
+            raise ValueError("Deadline must be today or in the future")
+        return v
+
+
 class GoalFundRequest(BaseModel):
     amount: float = Field(gt=0)

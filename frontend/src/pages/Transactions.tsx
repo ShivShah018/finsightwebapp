@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { TransactionService, ReportService } from '../services';
+import { TransactionService, CategoryService, ReportService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
 import { fmt as convertCurrency } from '../utils/currency';
 import { useRates } from '../hooks/useRates';
@@ -11,7 +11,9 @@ import {
   Download, 
   FileText, 
   AlertCircle,
-  X
+  X,
+  Edit,
+  Calendar
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -27,6 +29,12 @@ export const Transactions: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<number | undefined>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number | undefined>(new Date().getFullYear());
   const [showSoftDeleted, setShowSoftDeleted] = useState(false);
+  const [editingTx, setEditingTx] = useState<any>(null);
+  const [editType, setEditType] = useState<'income' | 'expense'>('expense');
+  const [editAmount, setEditAmount] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editCategoryId, setEditCategoryId] = useState('');
+  const [editDate, setEditDate] = useState('');
 
   // Queries
   const { data: txData, isLoading, error } = useQuery({
@@ -38,6 +46,11 @@ export const Transactions: React.FC = () => {
     queryKey: ['transactions', 'deleted'],
     queryFn: () => TransactionService.getDeletedRecent(),
     enabled: showSoftDeleted,
+  });
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => CategoryService.getAll(),
   });
 
   // Mutations
@@ -62,6 +75,19 @@ export const Transactions: React.FC = () => {
     },
     onError: () => {
       toast.error('Failed to restore transaction.');
+    }
+  });
+
+  const updateTxMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => TransactionService.update(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success('Transaction updated!');
+      setEditingTx(null);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.detail || 'Failed to update transaction.');
     }
   });
 
@@ -316,13 +342,29 @@ export const Transactions: React.FC = () => {
                         {tx.type === 'expense' ? '-' : ''}{fmt(tx.amount)}
                       </td>
                       <td className="py-3.5 px-6 text-center">
-                        <button
-                          onClick={() => deleteMutation.mutate(tx.id)}
-                          className="p-2 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => {
+                              setEditingTx(tx);
+                              setEditType(tx.type);
+                              setEditAmount(tx.amount.toString());
+                              setEditDescription(tx.description || '');
+                              setEditCategoryId(tx.category_id?.toString() || '');
+                              setEditDate(tx.transaction_date);
+                            }}
+                            className="p-2 hover:bg-purple-500/10 text-purple-400 rounded-lg transition-all cursor-pointer"
+                            title="Edit"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteMutation.mutate(tx.id)}
+                            className="p-2 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -330,6 +372,132 @@ export const Transactions: React.FC = () => {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Edit Transaction Modal */}
+      {editingTx && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Edit Transaction</h3>
+              <button 
+                onClick={() => setEditingTx(null)}
+                className="text-slate-500 hover:text-slate-300 text-sm cursor-pointer"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!editAmount || isNaN(Number(editAmount)) || Number(editAmount) <= 0) {
+                toast.error('Please enter a valid positive amount.');
+                return;
+              }
+              if (!editCategoryId) {
+                toast.error('Please select a category.');
+                return;
+              }
+              updateTxMutation.mutate({
+                id: editingTx.id,
+                data: {
+                  type: editType,
+                  amount: Number(editAmount),
+                  description: editDescription,
+                  category_id: Number(editCategoryId),
+                  transaction_date: editDate,
+                },
+              });
+            }} className="space-y-4">
+              <div className="flex bg-slate-950 border border-slate-800 rounded-xl p-1">
+                <button
+                  type="button"
+                  onClick={() => setEditType('expense')}
+                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                    editType === 'expense' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Expense
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditType('income')}
+                  className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+                    editType === 'income' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Income
+                </button>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Amount</label>
+                <input
+                  type="text"
+                  placeholder="e.g. 500"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Description</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Uber ride / Salary"
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Category</label>
+                <select
+                  value={editCategoryId}
+                  onChange={(e) => setEditCategoryId(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 px-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all cursor-pointer"
+                >
+                  <option value="">Select a category</option>
+                  {categories?.filter(c => c.type === editType).map((cat) => (
+                    <option key={cat.id} value={cat.id} className="bg-slate-950">
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5 uppercase">Transaction Date</label>
+                <div className="relative">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-500">
+                    <Calendar className="w-5 h-5" />
+                  </span>
+                  <input
+                    type="date"
+                    max={new Date().toISOString().split("T")[0]}
+                    value={editDate}
+                    onChange={(e) => setEditDate(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 pl-11 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-600/30 transition-all cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={updateTxMutation.isPending}
+                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-xl transition-all cursor-pointer shadow-lg shadow-purple-600/10 flex items-center justify-center"
+              >
+                {updateTxMutation.isPending ? (
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  'Save Changes'
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       )}
     </div>
