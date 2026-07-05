@@ -32,7 +32,20 @@ export const Analytics: React.FC = () => {
     retry: false,
   });
 
-  const trendData = trends?.map(t => ({ ...t, net: t.income - t.expense })) || [];
+  const allMonths: { month: string; income: number; expense: number; net: number }[] = [];
+  const trendMap = new Map((trends || []).map((m: any) => [m.month, m]));
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const existing = trendMap.get(key);
+    allMonths.push({
+      month: key,
+      income: existing?.income ?? 0,
+      expense: existing?.expense ?? 0,
+      net: (existing?.income ?? 0) - (existing?.expense ?? 0),
+    });
+  }
   const isLoading = trendsLoading || clustersLoading;
 
   if (isLoading) {
@@ -63,20 +76,20 @@ export const Analytics: React.FC = () => {
           <p className="text-xs text-slate-500">Net savings (income − expenses) each month. Green means surplus, red means deficit.</p>
         </div>
         <div className="h-96 w-full">
-          {!trends || trends.length === 0 ? (
+          {allMonths.every(m => m.income === 0 && m.expense === 0) ? (
             <div className="h-full flex items-center justify-center text-slate-500 text-xs">No trend details available.</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trendData}>
-                <XAxis dataKey="month" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v, cur, rates, 'INR')} />
+              <BarChart data={allMonths}>
+                <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v, cur, rates, 'INR')} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
                   formatter={(value) => fmt(Number(value) || 0, cur, rates, 'INR')}
                 />
                 <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
-                  {trendData.map((d, i) => (
+                  {allMonths.map((d, i) => (
                     <Cell key={i} fill={d.net >= 0 ? '#10b981' : '#ef4444'} />
                   ))}
                 </Bar>

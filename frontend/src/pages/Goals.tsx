@@ -219,35 +219,37 @@ export const Goals: React.FC = () => {
                     <span>{goal.deadline ? new Date(goal.deadline).toLocaleDateString() : 'No deadline'}</span>
                   </div>
 
-                  {goal.status === 'active' && (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setFundingGoal({ id: goal.id, name: goal.name })}
-                        className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
-                      >
-                        <Coins className="w-3.5 h-3.5" />
-                        <span>Fund</span>
-                      </button>
-                      
-                      {!isCompleted && (
+                  <div className="flex items-center gap-2">
+                    {goal.status === 'active' && (
+                      <>
                         <button
-                          onClick={() => completeMutation.mutate(goal.id)}
-                          className="p-1.5 hover:bg-emerald-500/10 text-emerald-400 rounded-lg transition-all cursor-pointer"
-                          title="Complete Goal"
+                          onClick={() => setFundingGoal({ id: goal.id, name: goal.name })}
+                          className="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-500 text-white font-semibold text-[10px] px-2.5 py-1.5 rounded-lg transition-all cursor-pointer"
                         >
-                          <CheckCircle2 className="w-4 h-4" />
+                          <Coins className="w-3.5 h-3.5" />
+                          <span>Fund</span>
                         </button>
-                      )}
-                      
-                      <button
-                        onClick={() => setDeletingGoal({ id: goal.id, name: goal.name })}
-                        className="p-1.5 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
-                        title="Delete Goal"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  )}
+                        
+                        {!isCompleted && (
+                          <button
+                            onClick={() => completeMutation.mutate(goal.id)}
+                            className="p-1.5 hover:bg-emerald-500/10 text-emerald-400 rounded-lg transition-all cursor-pointer"
+                            title="Complete Goal"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </>
+                    )}
+                    
+                    <button
+                      onClick={() => setDeletingGoal({ id: goal.id, name: goal.name })}
+                      className="p-1.5 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
+                      title="Delete Goal"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             );
