@@ -1,5 +1,6 @@
 import logging
 from datetime import date
+from typing import Optional
 from repositories.transaction_repository import TransactionRepository
 from repositories.goal_repository import GoalRepository
 from repositories.budget_repository import BudgetRepository
@@ -13,7 +14,7 @@ class AnalyticsService:
         self.goal_repo = GoalRepository()
         self.budget_repo = BudgetRepository()
 
-    def get_dashboard(self, user_id: int, month: int = None, year: int = None):
+    def get_dashboard(self, user_id: int, month: Optional[int] = None, year: Optional[int] = None):
         today = date.today()
         month = month or today.month
         year = year or today.year
