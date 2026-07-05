@@ -30,3 +30,6 @@ class GoalService:
 
     def cancel(self, goal_id: int, user_id: int):
         self.goal_repo.cancel(goal_id, user_id)
+
+    def delete(self, goal_id: int, user_id: int):
+        self.goal_repo.delete(goal_id, user_id)

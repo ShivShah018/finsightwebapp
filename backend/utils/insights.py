@@ -4,7 +4,6 @@ import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
-from datetime import date, timedelta
 from collections import defaultdict
 
 
@@ -167,34 +166,4 @@ def cluster_transactions(transactions, n_clusters=3):
     return results
 
 
-def generate_tips(user, transactions, goals, budgets, spending_prediction):
-    """Generate personalized financial tips."""
-    tips = []
-    income_total = sum(t.amount for t in transactions if t.type == "income")
-    expense_total = sum(t.amount for t in transactions if t.type == "expense")
 
-    if income_total > 0:
-        savings_rate = (income_total - expense_total) / income_total * 100
-        if savings_rate < 10:
-            tips.append({"type": "warning", "icon": "\u26A0",
-                         "text": f"Savings rate is {savings_rate:.0f}%. Aim for at least 20%."})
-        elif savings_rate > 30:
-            tips.append({"type": "success", "icon": "\u2714",
-                         "text": f"Great savings rate of {savings_rate:.0f}%! You're on track."})
-
-    active_goals = [g for g in goals if g.status == "active"]
-    for g in active_goals:
-        remaining = g.target_amount - g.current_amount
-        if remaining > 0 and expense_total > 0:
-            monthly_surplus = income_total - expense_total
-            months_to_goal = remaining / monthly_surplus if monthly_surplus > 0 else 999
-            if months_to_goal < 99:
-                tips.append({"type": "info", "icon": "\U0001F3AF",
-                             "text": f"Goal '{g.name}': ~{months_to_goal:.0f} months away at current rate."})
-
-    if spending_prediction and spending_prediction.get("trend") == "rising":
-        tips.append({"type": "warning", "icon": "\U0001F4C8",
-                     "text": f"Spending is rising ({spending_prediction['slope']:+.0f}/mo). "
-                             f"Next month predicted: \u20B9{spending_prediction['predicted_total']:,.0f}."})
-
-    return tips

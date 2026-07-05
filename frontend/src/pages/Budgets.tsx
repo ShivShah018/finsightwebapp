@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { BudgetService, CategoryService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
+import { fmt as convertCurrency } from '../utils/currency';
+import { useRates } from '../hooks/useRates';
 import { 
   PlusCircle, 
   Trash2, 
@@ -14,6 +16,8 @@ import type { BudgetUtilization } from '../types';
 
 export const Budgets: React.FC = () => {
   const { user } = useAuth();
+  const { rates } = useRates();
+  const cur = user?.currency || 'INR';
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingBudget, setEditingBudget] = useState<{ id: number; category_name: string; limit: number } | null>(null);
@@ -102,10 +106,7 @@ export const Budgets: React.FC = () => {
     }
   };
 
-  const fmt = (val: number) => {
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
-    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
-  };
+  const fmt = (val: number) => convertCurrency(val, cur, rates);
 
   // Generate budget advisory tips
   const getAdvisoryTip = (spent: number, limit: number, category: string) => {
@@ -215,7 +216,7 @@ export const Budgets: React.FC = () => {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => deleteMutation.mutate(bud.category_id)}
+                        onClick={() => deleteMutation.mutate(bud.id)}
                         className="p-1.5 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
                         title="Remove Limit"
                       >

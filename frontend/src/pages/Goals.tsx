@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GoalService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
+import { fmt as convertCurrency } from '../utils/currency';
+import { useRates } from '../hooks/useRates';
 import { 
   PlusCircle, 
   Trash2, 
@@ -16,9 +18,12 @@ import toast from 'react-hot-toast';
 
 export const Goals: React.FC = () => {
   const { user } = useAuth();
+  const { rates } = useRates();
+  const cur = user?.currency || 'INR';
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [fundingGoal, setFundingGoal] = useState<{ id: number; name: string } | null>(null);
+  const [deletingGoal, setDeletingGoal] = useState<{ id: number; name: string } | null>(null);
 
   // Form states
   const [name, setName] = useState('');
@@ -72,14 +77,14 @@ export const Goals: React.FC = () => {
     }
   });
 
-  const cancelMutation = useMutation({
-    mutationFn: GoalService.cancel,
+  const deleteGoalMutation = useMutation({
+    mutationFn: GoalService.delete,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['goals'] });
-      toast.success('Savings goal cancelled.');
+      toast.success('Savings goal deleted permanently.');
     },
     onError: () => {
-      toast.error('Failed to cancel goal.');
+      toast.error('Failed to delete goal.');
     }
   });
 
@@ -114,10 +119,7 @@ export const Goals: React.FC = () => {
     }
   };
 
-  const fmt = (val: number) => {
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
-    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
-  };
+  const fmt = (val: number) => convertCurrency(val, cur, rates);
 
   return (
     <div className="space-y-6">
@@ -238,9 +240,9 @@ export const Goals: React.FC = () => {
                       )}
                       
                       <button
-                        onClick={() => cancelMutation.mutate(goal.id)}
+                        onClick={() => setDeletingGoal({ id: goal.id, name: goal.name })}
                         className="p-1.5 hover:bg-rose-500/10 text-rose-400 rounded-lg transition-all cursor-pointer"
-                        title="Cancel Goal"
+                        title="Delete Goal"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -322,6 +324,38 @@ export const Goals: React.FC = () => {
                 )}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Goal Confirmation Modal */}
+      {deletingGoal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl text-center">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center">
+              <Trash2 className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Delete Goal?</h3>
+            <p className="text-sm text-slate-400 mb-6">
+              Are you sure you want to permanently delete <span className="font-semibold text-slate-200">{deletingGoal.name}</span>? This cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeletingGoal(null)}
+                className="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  deleteGoalMutation.mutate(deletingGoal.id);
+                  setDeletingGoal(null);
+                }}
+                className="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-all cursor-pointer"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AnalyticsService, TransactionService, CategoryService, InsightService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
+import { fmt as convertCurrency } from '../utils/currency';
+import { useRates } from '../hooks/useRates';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -14,19 +16,21 @@ import {
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
-  AreaChart, 
-  Area, 
+  BarChart, 
+  Bar, 
+  Cell, 
   XAxis, 
   YAxis, 
   Tooltip, 
   PieChart, 
   Pie, 
-  Cell 
 } from 'recharts';
 import toast from 'react-hot-toast';
 
 export const Dashboard: React.FC = () => {
   const { user } = useAuth();
+  const { rates } = useRates();
+  const cur = user?.currency || 'INR';
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -143,8 +147,7 @@ export const Dashboard: React.FC = () => {
   // Format currency helper
   const fmt = (val: number | null | undefined) => {
     if (val == null) return '';
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
-    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+    return convertCurrency(val ?? 0, cur, rates);
   };
 
   // Pie chart colors
@@ -154,6 +157,22 @@ export const Dashboard: React.FC = () => {
     name: cat.category_name,
     value: cat.amount
   })) || [];
+
+  // Fill in all 12 months so gaps show as zero
+  const allMonths: { month: string; income: number; expense: number; net: number }[] = [];
+  const trendMap = new Map((dashboardData.monthly_trends || []).map((m: any) => [m.month, m]));
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const existing = trendMap.get(key);
+    allMonths.push({
+      month: key,
+      income: existing?.income ?? 0,
+      expense: existing?.expense ?? 0,
+      net: (existing?.income ?? 0) - (existing?.expense ?? 0),
+    });
+  }
 
   return (
     <div className="space-y-8">
@@ -264,36 +283,29 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Charts & Visual Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Trend Area Chart */}
+        {/* Trend Bar Chart */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
           <div className="mb-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Monthly Cashflow Trend</h3>
-            <p className="text-xs text-slate-500">Overview of income and expenses over time.</p>
+            <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Monthly Cashflow Difference</h3>
+            <p className="text-xs text-slate-500">Net savings (income − expenses) per month. Green = surplus, red = deficit.</p>
           </div>
           <div className="h-80 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dashboardData.monthly_trends || []}>
-                <defs>
-                  <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="month" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹'; return `${sym}${v}`; }} />
+              <BarChart data={allMonths}>
+                <XAxis dataKey="month" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => convertCurrency(v, cur, rates)} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
+                  formatter={(value: any) => convertCurrency(Number(value) || 0, cur, rates)}
                 />
-                <Area type="monotone" dataKey="income" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#incomeGrad)" name="Income" />
-                <Area type="monotone" dataKey="expense" stroke="#ef4444" strokeWidth={2} fillOpacity={1} fill="url(#expenseGrad)" name="Expense" />
-              </AreaChart>
+                <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
+                  {allMonths.map((d, i) => (
+                    <Cell key={i} fill={d.net >= 0 ? '#10b981' : '#ef4444'} />
+                  ))}
+                </Bar>
+              </BarChart>
             </ResponsiveContainer>
           </div>
         </div>

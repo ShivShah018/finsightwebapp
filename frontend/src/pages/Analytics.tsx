@@ -2,19 +2,23 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { AnalyticsService, InsightService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
+import { fmt } from '../utils/currency';
+import { useRates } from '../hooks/useRates';
 import { 
   BarChart, 
   Bar, 
+  Cell, 
   XAxis, 
   YAxis, 
   Tooltip, 
   ResponsiveContainer, 
-  Legend
 } from 'recharts';
 import { Brain, AlertCircle } from 'lucide-react';
 
 export const Analytics: React.FC = () => {
   const { user } = useAuth();
+  const { rates } = useRates();
+  const cur = user?.currency || 'INR';
 
   // Queries
   const { data: trends, isLoading: trendsLoading } = useQuery({
@@ -28,11 +32,7 @@ export const Analytics: React.FC = () => {
     retry: false,
   });
 
-  const fmt = (val: number) => {
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
-    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
-  };
-
+  const trendData = trends?.map(t => ({ ...t, net: t.income - t.expense })) || [];
   const isLoading = trendsLoading || clustersLoading;
 
   if (isLoading) {
@@ -56,27 +56,30 @@ export const Analytics: React.FC = () => {
         <p className="text-sm text-slate-400">Discover long-term cashflow patterns and ML-clustered spending behaviors.</p>
       </div>
 
-      {/* Cashflow Trends double bar chart */}
+      {/* Cashflow monthly difference chart */}
       <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl">
         <div className="mb-6">
-          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Annual Cash Flow (Income vs Expenses)</h3>
-          <p className="text-xs text-slate-500">Comparing inflows vs outflows over the past 12 months.</p>
+          <h3 className="text-sm font-semibold uppercase tracking-wide text-slate-300">Monthly Cashflow Difference</h3>
+          <p className="text-xs text-slate-500">Net savings (income − expenses) each month. Green means surplus, red means deficit.</p>
         </div>
         <div className="h-96 w-full">
           {!trends || trends.length === 0 ? (
             <div className="h-full flex items-center justify-center text-slate-500 text-xs">No trend details available.</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={trends}>
+              <BarChart data={trendData}>
                 <XAxis dataKey="month" stroke="#475569" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => { const sym = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹'; return `${sym}${v}`; }} />
+                <YAxis stroke="#475569" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => fmt(v, cur, rates, 'INR')} />
                 <Tooltip 
                   contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '12px' }}
                   labelStyle={{ color: '#94a3b8', fontWeight: 600 }}
+                  formatter={(value) => fmt(Number(value) || 0, cur, rates, 'INR')}
                 />
-                <Legend verticalAlign="top" height={36} iconType="circle" />
-                <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} name="Income" />
-                <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} name="Expense" />
+                <Bar dataKey="net" radius={[4, 4, 0, 0]} name="Net Savings">
+                  {trendData.map((d, i) => (
+                    <Cell key={i} fill={d.net >= 0 ? '#10b981' : '#ef4444'} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -124,11 +127,11 @@ export const Analytics: React.FC = () => {
                 <div className="space-y-2 pt-4 border-t border-slate-800/60">
                   <div className="flex justify-between text-xs">
                     <span className="text-slate-400">Total Spent</span>
-                    <span className="font-semibold text-slate-200">{fmt(cluster.total_amount)}</span>
+                    <span className="font-semibold text-slate-200">{fmt(cluster.total_amount, cur, rates)}</span>
                   </div>
                   <div className="flex justify-between text-xs">
                     <span className="text-slate-400">Average Transaction</span>
-                    <span className="font-semibold text-slate-200">{fmt(cluster.avg_amount)}</span>
+                    <span className="font-semibold text-slate-200">{fmt(cluster.avg_amount, cur, rates)}</span>
                   </div>
                 </div>
               </div>

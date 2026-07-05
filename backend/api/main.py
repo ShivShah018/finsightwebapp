@@ -25,6 +25,7 @@ from schemas.goals import GoalCreate, GoalResponse, GoalFundRequest
 from schemas.budgets import BudgetCreate, BudgetResponse, BudgetUpdate
 from schemas.analytics import DashboardSummary
 from utils.config_manager import load_env
+from utils.currency import get_rates, SYMBOLS, CURRENCY_NAMES, get_conversion_note
 
 load_env()
 
@@ -290,6 +291,14 @@ def cancel_goal(goal_id: int, user=Depends(get_current_user)):
     return {"message": "Goal cancelled"}
 
 
+@app.delete("/goals/{goal_id}",
+            summary="Delete a goal permanently",
+            description="Permanently removes a savings goal from the database.")
+def delete_goal(goal_id: int, user=Depends(get_current_user)):
+    goal_service.delete(goal_id, user.id)
+    return {"message": "Goal deleted permanently"}
+
+
 # ── Budgets ─────────────────────────────────────────────────────
 @app.get("/budgets",
          summary="List budget limits",
@@ -454,6 +463,28 @@ def generate_report(email_to: Optional[str] = None, user=Depends(get_current_use
     data = analytics_service.get_export_data(user.id)
     path = generate_pdf_report(user, data["transactions"], data["goals"], data["budgets"])
     return {"path": path, "message": f"Report generated at {path}"}
+
+
+# ── Currency ───────────────────────────────────────────────────
+@app.get("/currency/rates",
+          summary="Get live exchange rates",
+          description="Returns current exchange rates for all supported currencies against INR. Cached for 1 hour.")
+def currency_rates(from_cur: str = Query("INR", min_length=3, max_length=3),
+                   amount: float = Query(1.0, ge=0)):
+    rates = get_rates()
+    result = {}
+    for cur in CURRENCY_NAMES:
+        r = rates.get(cur, 1.0)
+        result[cur] = {
+            "rate": r,
+            "symbol": SYMBOLS.get(cur, cur),
+            "name": cur,
+        }
+    notes = {}
+    for cur in CURRENCY_NAMES:
+        if cur != from_cur:
+            notes[cur] = get_conversion_note(from_cur, cur)
+    return {"base": from_cur, "rates": result, "notes": notes}
 
 
 # ── Health ──────────────────────────────────────────────────────

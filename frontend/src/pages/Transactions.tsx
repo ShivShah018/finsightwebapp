@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TransactionService, ReportService } from '../services';
 import { useAuth } from '../contexts/AuthContext';
+import { fmt as convertCurrency } from '../utils/currency';
+import { useRates } from '../hooks/useRates';
 import { 
   Search, 
   Trash2, 
@@ -15,6 +17,8 @@ import toast from 'react-hot-toast';
 
 export const Transactions: React.FC = () => {
   const { user } = useAuth();
+  const { rates } = useRates();
+  const cur = user?.currency || 'INR';
   const queryClient = useQueryClient();
   
   // States
@@ -113,10 +117,7 @@ export const Transactions: React.FC = () => {
     toast.success('CSV export completed.');
   };
 
-  const fmt = (val: number) => {
-    const symbol = user?.currency === 'USD' ? '$' : user?.currency === 'NPR' ? 'रु' : '₹';
-    return `${symbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0 })}`;
-  };
+  const fmt = (val: number) => convertCurrency(val, cur, rates);
 
   return (
     <div className="space-y-6">

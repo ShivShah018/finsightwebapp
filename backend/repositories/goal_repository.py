@@ -73,6 +73,17 @@ class GoalRepository(BaseRepository):
         finally:
             cursor.close()
 
+    def delete(self, goal_id: int, user_id: int) -> None:
+        cursor = self.db.connection.cursor()
+        try:
+            cursor.execute(
+                "DELETE FROM savings_goals WHERE id = %s AND user_id = %s",
+                (goal_id, user_id),
+            )
+            self.db.connection.commit()
+        finally:
+            cursor.close()
+
     def set_auto_fund(self, goal_id: int, user_id: int,
                        amount: float, category_id: Optional[int] = None) -> None:
         cursor = self.db.connection.cursor()

@@ -98,6 +98,11 @@ export const GoalService = {
     const res = await apiClient.post(`/goals/${id}/cancel`);
     return res.data;
   },
+
+  delete: async (id: number) => {
+    const res = await apiClient.delete(`/goals/${id}`);
+    return res.data;
+  },
 };
 
 export const BudgetService = {
