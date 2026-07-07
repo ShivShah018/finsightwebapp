@@ -29,10 +29,10 @@ A full-stack personal finance manager with AI-powered spending insights. Track t
 
 ```mermaid
 flowchart LR
-    A[React SPA<br/>localhost:5173] -->|HTTP JSON| B[Express.js Server<br/>localhost:8000]
-    B --> C[(MySQL 8.0<br/>5 tables)]
-    B --> D[Python ML Subprocess<br/>scikit-learn]
-    D -->|stdin/stdout JSON| B
+    A["React SPA (5173)"] -->|HTTP JSON| B["Express Server (8000)"]
+    B --> C["MySQL"]
+    B --> D["Python ML"]
+    D -->|JSON| B
 ```
 
 ### Authentication Flow
@@ -40,42 +40,44 @@ flowchart LR
 ```mermaid
 sequenceDiagram
     participant C as Client
-    participant E as Express.js
+    participant E as Express
     participant DB as MySQL
 
-    C->>E: POST /auth/register { full_name, email, password }
-    E->>DB: INSERT INTO users (bcrypt hash)
+    C->>E: POST /auth/register
+    Note over C,E: full_name, email, password
+    E->>DB: INSERT INTO users
     DB-->>E: user_id
-    E-->>C: { access_token, user_id, name, email }
+    E-->>C: access_token + user data
 
-    C->>E: POST /auth/login { email, password }
-    E->>DB: SELECT user WHERE email = ?
-    DB-->>E: user + password_hash
-    E->>E: bcrypt.compare()
-    E-->>C: { access_token, user_id, name, email }
+    C->>E: POST /auth/login
+    Note over C,E: email, password
+    E->>DB: SELECT user
+    DB-->>E: user + hash
+    E->>E: Verify password
+    E-->>C: access_token + user data
 
-    C->>E: GET /transactions (Authorization: Bearer &lt;token&gt;)
-    E->>E: jwt.verify(token)
-    E->>DB: SELECT WHERE user_id = ?
+    C->>E: GET /transactions
+    Note over C,E: Bearer token
+    E->>E: Verify JWT
+    E->>DB: SELECT transactions
     DB-->>E: transactions
-    E-->>C: { transactions }
+    E-->>C: JSON array
 ```
 
 ### ML Flow
 
 ```mermaid
 flowchart LR
-    subgraph Express.js
-        IC[InsightController]
-        MLH[mlHelper.js]
+    subgraph Express
+        IC[Controller]
+        MLH[Helper]
     end
     subgraph Python
-        PY[ml_service.py]
+        PY["ml_service.py"]
     end
     IC --> MLH
     MLH -->|spawn| PY
-    PY -->|stdin: { mode, transactions }| PY
-    PY -->|stdout: { predictedAmount, trend, confidence }| MLH
+    PY -->|result| MLH
     MLH --> IC
 ```
 
