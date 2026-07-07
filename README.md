@@ -236,9 +236,9 @@ erDiagram
         int id PK
         int user_id FK
         int category_id FK
-        int month
-        int year
-        decimal limit_amount
+        decimal monthly_limit
+        datetime created_at
+        datetime updated_at
     }
     users ||--o{ categories : "has"
     users ||--o{ transactions : "has"
