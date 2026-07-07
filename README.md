@@ -282,6 +282,10 @@ This keeps Node.js free of Python dependencies while leveraging scikit-learn. Th
 |:---:|:---:|
 | ![Goals](screenshots/goals.png) | ![Analytics](screenshots/analytics.png) |
 
+| Settings | |
+|:---:|:---:|
+| ![Settings](screenshots/settings.png) | |
+
 ## Installation
 
 ### Prerequisites
