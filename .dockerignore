@@ -1,0 +1,17 @@
+node_modules/
+.git/
+.env*
+screenshots/
+backend/
+frontend/
+.gitattributes
+.gitignore
+README.md
+LICENSE
+test_e2e.js
+.vscode/
+__pycache__/
+*.pyc
+*.log
+coverage/
+dist/

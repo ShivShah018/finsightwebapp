@@ -16,14 +16,25 @@ function generatePdfReport(user, transactions, goals, budgets, outputPath = null
       doc.pipe(stream);
 
       // Register system fonts to support unicode currency symbols
-      doc.registerFont('Arial', 'C:\\Windows\\Fonts\\arial.ttf');
-      doc.registerFont('Arial-Bold', 'C:\\Windows\\Fonts\\arialbd.ttf');
-      doc.registerFont('Mangal', 'C:\\Windows\\Fonts\\mangal.ttf');
-      doc.registerFont('Mangal-Bold', 'C:\\Windows\\Fonts\\mangalb.ttf');
+      if (os.platform() === 'win32') {
+        doc.registerFont('Arial', 'C:\\Windows\\Fonts\\arial.ttf');
+        doc.registerFont('Arial-Bold', 'C:\\Windows\\Fonts\\arialbd.ttf');
+        doc.registerFont('Mangal', 'C:\\Windows\\Fonts\\mangal.ttf');
+        doc.registerFont('Mangal-Bold', 'C:\\Windows\\Fonts\\mangalb.ttf');
+      } else {
+        const fontDir = path.join(__dirname, '..', 'fonts');
+        doc.registerFont('NotoDeva', path.join(fontDir, 'NotoSansDevanagari-Regular.ttf'));
+      }
 
       const isNpr = user.preferred_currency === 'NPR';
-      const regularFont = isNpr ? 'Mangal' : 'Arial';
-      const boldFont = isNpr ? 'Mangal-Bold' : 'Arial-Bold';
+      let regularFont, boldFont;
+      if (os.platform() === 'win32') {
+        regularFont = isNpr ? 'Mangal' : 'Arial';
+        boldFont = isNpr ? 'Mangal-Bold' : 'Arial-Bold';
+      } else {
+        regularFont = isNpr ? 'NotoDeva' : 'Helvetica';
+        boldFont = isNpr ? 'NotoDeva' : 'Helvetica-Bold';
+      }
 
       const sym = SYMBOLS[user.preferred_currency || 'INR'] || '';
 
