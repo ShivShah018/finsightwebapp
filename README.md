@@ -62,7 +62,7 @@ The frontend is a React SPA that communicates with the Express backend over HTTP
 ## Folder Structure
 
 ```
-finsightwebapp/
+FinSight/
 ├── frontend/                  # React SPA (Vite + TypeScript)
 │   ├── src/
 │   │   ├── components/        # AuthRoute, Layout, ProtectedRoute, Sidebar
@@ -249,8 +249,8 @@ This keeps the Node.js backend free of Python dependencies while allowing the ML
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/ShivShah018/finsightwebapp.git
-cd finsightwebapp
+git clone https://github.com/ShivShah018/FinSight.git
+cd FinSight
 ```
 
 ### 2. Database Setup
