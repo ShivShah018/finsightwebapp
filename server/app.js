@@ -24,6 +24,7 @@ try {
   const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
   appVersion = pkg.version || appVersion;
 } catch (e) { /* use default */ }
+// Version source: server/package.json
 
 // CORS — read origins from env, fall back to dev defaults
 const corsOrigins = process.env.CORS_ORIGINS
