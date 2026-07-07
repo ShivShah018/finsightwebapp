@@ -23,7 +23,8 @@ async function getRates() {
   }
 
   try {
-    const response = await fetch('https://open.er-api.com/v6/latest/INR');
+    const apiUrl = process.env.CURRENCY_API_URL || 'https://open.er-api.com/v6/latest/INR';
+    const response = await fetch(apiUrl);
     if (!response.ok) {
       throw new Error(`API returned status ${response.status}`);
     }

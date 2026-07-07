@@ -7,10 +7,12 @@ const ML_SCRIPT_PATH = path.join(__dirname, '..', 'ml', 'ml_service.py');
 
 function runMl(mode, transactions) {
   return new Promise((resolve, reject) => {
-    // Determine Python executable path (venv python if exists, fallback to 'python')
-    let pythonPath = 'python';
-    if (fs.existsSync(VENV_PYTHON_PATH)) {
-      pythonPath = VENV_PYTHON_PATH;
+    let pythonPath = process.env.ML_PYTHON_PATH;
+    if (!pythonPath) {
+      pythonPath = 'python3';
+      if (fs.existsSync(VENV_PYTHON_PATH)) {
+        pythonPath = VENV_PYTHON_PATH;
+      }
     }
 
     const py = spawn(pythonPath, [ML_SCRIPT_PATH]);

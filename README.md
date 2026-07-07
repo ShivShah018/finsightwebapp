@@ -33,7 +33,7 @@ FinSight uses a clean, production-grade decoupled architecture:
 - **Transaction Ledger**: Search, filter, soft-delete, and restore transactions.
 - **Budgeting**: Set monthly budgets per category with progress bars and utilization alerts.
 - **Savings Goals**: Track goal progress, fund goals, and mark them complete.
-- **AI Analytics**: Spending prediction via Linear Regression, transaction clustering via K-Means.
+- **AI Analytics**: Spending forecasting and behavioral spending group profiling.
 - **PDF Reports**: Export monthly A4 statement summaries as styled PDFs using `pdfkit`.
 - **Multi-Currency**: Supports INR, USD, NPR with live exchange rates cached hourly.
 
@@ -69,11 +69,13 @@ finsightwebapp/
 ├── server/                    # Node.js Express.js Backend
 │   ├── controllers/           # Route controllers (Auth, Transactions, Goals, Budgets, Analytics, ML Insights)
 │   ├── routes/                # Route definitions
-│   ├── utils/                 # Currency rates, PDF generator, and ML python script
+│   ├── utils/                 # Currency rates, PDF generator, and ML subprocess helper
 │   │   ├── currency.js        # Live exchange rates fetcher
 │   │   ├── reportGenerator.js # PDFKit monthly statements compiler
-│   │   ├── mlHelper.js        # Node subprocess runner for python ML
-│   │   └── ml_service.py      # Standalone Python script running ML algorithms
+│   │   └── mlHelper.js        # Node subprocess runner for python ML
+│   ├── ml/                    # Python ML service
+│   │   ├── ml_service.py      # Standalone Python script running ML algorithms
+│   │   └── requirements.txt   # Python dependencies
 │   ├── database/              # Schema reference SQL files
 │   ├── db.js                  # MySQL connection pooling setup
 │   ├── app.js                 # Express application & middleware setup
@@ -81,11 +83,11 @@ finsightwebapp/
 │   ├── .env                   # Server configuration variables
 │   └── package.json           # Node dependencies
 │
-├── backend/                   # Python environment directory
-│   ├── .venv/                 # Python virtual environment for scikit-learn & numpy
-│   └── .env                   # Legacy env configuration reference
+├── backend/                   # Python virtual environment (for ML subprocess)
+│   └── .venv/                 # Python venv for scikit-learn & numpy
 │
-├── test_e2e.py                # E2E integration test suite
+├── test_e2e.js                # E2E integration test suite
+├── LICENSE
 └── README.md
 ```
 
@@ -152,9 +154,8 @@ Run the schema and migration files located in `server/database/schema.sql` again
 To verify that the Express server meets the exact REST API contract:
 
 ```bash
-# Verify Python venv dependencies are present (numpy, scikit-learn)
-# Run tests:
-python test_e2e.py
+# Ensure the Express server is running, then:
+node test_e2e.js
 ```
 
 ---
@@ -163,5 +164,5 @@ python test_e2e.py
 
 To keep the application simple and interview-friendly, python is strictly isolated for ML calculations. Express.js spawns the Python subprocess:
 
-1. **Linear Regression (`predict` mode)**: Calculates monthly spending trajectories over the past year, fits a linear regression model, and forecasts next month's total spending along with trend slope and confidence scores ($R^2$).
-2. **K-Means Clustering (`cluster` mode)**: Profiles spending behaviors by grouping transactions into three clusters: "High Spends", "Everyday Essentials", and "Occasional" using transaction amounts, day of month, day of week, and weekend flags.
+1. **Prediction (`predict` mode)**: Calculates monthly spending trajectories over the past year, fits a regression model, and forecasts next month's total spending along with trend slope and confidence scores.
+2. **Clustering (`cluster` mode)**: Profiles spending behaviors by grouping transactions into behavioral groups: "High Spends", "Everyday Essentials", and "Occasional" using transaction amounts, day of month, day of week, and weekend flags.

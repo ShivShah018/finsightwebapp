@@ -120,7 +120,7 @@ export const Transactions: React.FC = () => {
         }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
-          console.error(err);
+          if (import.meta.env.DEV) console.error(err);
           toast.error('Failed to save PDF statement.');
         }
       }

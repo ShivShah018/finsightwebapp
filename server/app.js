@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 const authMiddleware = require('./utils/authMiddleware');
 
 // Import routers & controllers
@@ -16,18 +18,19 @@ const currencyController = require('./controllers/currencyController');
 
 const app = express();
 
-// Middlewares
-app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'http://localhost:5174',
-    'http://127.0.0.1:5174',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
-  credentials: true
-}));
+// Read version from package.json
+let appVersion = '2.0.0';
+try {
+  const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+  appVersion = pkg.version || appVersion;
+} catch (e) { /* use default */ }
+
+// CORS — read origins from env, fall back to dev defaults
+const corsOrigins = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map(s => s.trim())
+  : ['http://localhost:5173', 'http://127.0.0.1:5173'];
+
+app.use(cors({ origin: corsOrigins, credentials: true }));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -36,7 +39,7 @@ app.use(express.urlencoded({ extended: true }));
 app.get('/health', (req, res) => {
   return res.status(200).json({
     status: 'healthy',
-    version: '2.0.0'
+    version: appVersion
   });
 });
 
@@ -56,9 +59,14 @@ app.get('/categories', authMiddleware, transactionController.listCategories);
 app.get('/dashboard', authMiddleware, analyticsController.getDashboard);
 app.post('/report/generate', authMiddleware, analyticsController.generateReport);
 
+// 404 handler for unmatched routes
+app.use((req, res) => {
+  return res.status(404).json({ detail: `Route ${req.method} ${req.path} not found` });
+});
+
 // Global Exception Handler
 app.use((err, req, res, next) => {
-  console.error('Global unhandled exception:', err);
+  console.error('Unhandled error on', req.method, req.path, err);
   return res.status(500).json({
     detail: 'Internal server error'
   });

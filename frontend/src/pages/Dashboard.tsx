@@ -140,7 +140,7 @@ export const Dashboard: React.FC = () => {
       <div className="flex flex-col items-center justify-center py-20 text-slate-400">
         <AlertCircle className="w-12 h-12 text-rose-500 mb-4 animate-bounce" />
         <h3 className="text-lg font-semibold text-white mb-2">Failed to Load Dashboard</h3>
-        <p className="text-sm text-slate-500 mb-6">Make sure the FastAPI backend is running and database migrations are fully set up.</p>
+        <p className="text-sm text-slate-500 mb-6">Make sure the backend server is running and properly connected to the database.</p>
       </div>
     );
   }
