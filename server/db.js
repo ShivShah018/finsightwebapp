@@ -6,21 +6,24 @@ require('dotenv').config();
 function getDbConfig() {
   const mysqlUrl = process.env.MYSQL_URL;
   if (mysqlUrl) {
-    const parsed = new URL(mysqlUrl);
-    return {
-      host: parsed.hostname,
-      port: parseInt(parsed.port, 10) || 3306,
-      user: decodeURIComponent(parsed.username),
-      password: decodeURIComponent(parsed.password),
-      database: parsed.pathname.slice(1),
-      waitForConnections: true,
-      connectionLimit: 10,
-      queueLimit: 0,
-      dateStrings: true
-    };
+    try {
+      const parsed = new URL(mysqlUrl);
+      return {
+        host: parsed.hostname,
+        port: parseInt(parsed.port, 10) || 3306,
+        user: decodeURIComponent(parsed.username),
+        password: decodeURIComponent(parsed.password),
+        database: parsed.pathname.slice(1),
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0,
+        dateStrings: true
+      };
+    } catch {
+    }
   }
 
-  return {
+  const config = {
     host: process.env.MYSQL_HOST || process.env.FINSIGHT_DB_HOST || 'localhost',
     port: parseInt(process.env.MYSQL_PORT || process.env.FINSIGHT_DB_PORT || '3306', 10),
     user: process.env.MYSQL_USER || process.env.FINSIGHT_DB_USER || 'root',
@@ -31,6 +34,12 @@ function getDbConfig() {
     queueLimit: 0,
     dateStrings: true
   };
+
+  if (process.env.MYSQL_URL || process.env.MYSQL_HOST) {
+    console.log(`Connecting to MySQL at ${config.host}:${config.port}/${config.database} as ${config.user}`);
+  }
+
+  return config;
 }
 
 const pool = mysql.createPool(getDbConfig());
@@ -48,7 +57,9 @@ async function initializeSchema() {
   } catch (err) {
     console.error('Schema initialization error:', err.message);
   } finally {
-    if (conn) await conn.end();
+    if (conn) {
+      try { await conn.end(); } catch {}
+    }
   }
 }
 
