@@ -1,19 +1,57 @@
 const mysql = require('mysql2/promise');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
-const pool = mysql.createPool({
-  host: process.env.FINSIGHT_DB_HOST || 'localhost',
-  port: parseInt(process.env.FINSIGHT_DB_PORT || '3306', 10),
-  user: process.env.FINSIGHT_DB_USER || 'root',
-  password: process.env.FINSIGHT_DB_PASSWORD || '',
-  database: process.env.FINSIGHT_DB_NAME || 'finsight',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  dateStrings: true
-});
+function getDbConfig() {
+  const mysqlUrl = process.env.MYSQL_URL;
+  if (mysqlUrl) {
+    const parsed = new URL(mysqlUrl);
+    return {
+      host: parsed.hostname,
+      port: parseInt(parsed.port, 10) || 3306,
+      user: decodeURIComponent(parsed.username),
+      password: decodeURIComponent(parsed.password),
+      database: parsed.pathname.slice(1),
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      dateStrings: true
+    };
+  }
 
-// Seed default categories
+  return {
+    host: process.env.MYSQL_HOST || process.env.FINSIGHT_DB_HOST || 'localhost',
+    port: parseInt(process.env.MYSQL_PORT || process.env.FINSIGHT_DB_PORT || '3306', 10),
+    user: process.env.MYSQL_USER || process.env.FINSIGHT_DB_USER || 'root',
+    password: process.env.MYSQL_PASSWORD || process.env.FINSIGHT_DB_PASSWORD || '',
+    database: process.env.MYSQL_DATABASE || process.env.FINSIGHT_DB_NAME || 'finsight',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    dateStrings: true
+  };
+}
+
+const pool = mysql.createPool(getDbConfig());
+
+async function initializeSchema() {
+  let conn;
+  try {
+    conn = await mysql.createConnection({ ...getDbConfig(), multipleStatements: true });
+    const schemaPath = path.join(__dirname, 'database', 'schema_railway.sql');
+    if (fs.existsSync(schemaPath)) {
+      const sql = fs.readFileSync(schemaPath, 'utf8');
+      await conn.query(sql);
+      console.log('Database schema initialized successfully');
+    }
+  } catch (err) {
+    console.error('Schema initialization error:', err.message);
+  } finally {
+    if (conn) await conn.end();
+  }
+}
+
 const DEFAULT_INCOME_CATEGORIES = [
   ['Salary', '💵', '#22c55e'],
   ['Freelance', '💻', '#3b82f6'],
@@ -50,5 +88,6 @@ async function seedCategories(connection, userId) {
 
 module.exports = {
   pool,
-  seedCategories
+  seedCategories,
+  initializeSchema
 };
