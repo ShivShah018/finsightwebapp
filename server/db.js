@@ -8,7 +8,7 @@ function getDbConfig() {
   if (mysqlUrl) {
     try {
       const parsed = new URL(mysqlUrl);
-      return {
+      const cfg = {
         host: parsed.hostname,
         port: parseInt(parsed.port, 10) || 3306,
         user: decodeURIComponent(parsed.username),
@@ -17,29 +17,46 @@ function getDbConfig() {
         waitForConnections: true,
         connectionLimit: 10,
         queueLimit: 0,
-        dateStrings: true
+        dateStrings: true,
+        connectTimeout: 10000
       };
+      console.log(`Connecting to Railway MySQL at ${cfg.host}:${cfg.port}/${cfg.database}`);
+      return cfg;
     } catch {
     }
   }
 
-  const config = {
-    host: process.env.MYSQL_HOST || process.env.FINSIGHT_DB_HOST || 'localhost',
-    port: parseInt(process.env.MYSQL_PORT || process.env.FINSIGHT_DB_PORT || '3306', 10),
-    user: process.env.MYSQL_USER || process.env.FINSIGHT_DB_USER || 'root',
-    password: process.env.MYSQL_PASSWORD || process.env.FINSIGHT_DB_PASSWORD || '',
-    database: process.env.MYSQL_DATABASE || process.env.FINSIGHT_DB_NAME || 'finsight',
+  const host = process.env.MYSQL_HOST || process.env.FINSIGHT_DB_HOST;
+  if (host) {
+    const cfg = {
+      host,
+      port: parseInt(process.env.MYSQL_PORT || process.env.FINSIGHT_DB_PORT || '3306', 10),
+      user: process.env.MYSQL_USER || process.env.FINSIGHT_DB_USER || 'root',
+      password: process.env.MYSQL_PASSWORD || process.env.FINSIGHT_DB_PASSWORD || '',
+      database: process.env.MYSQL_DATABASE || process.env.FINSIGHT_DB_NAME || 'finsight',
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
+      dateStrings: true,
+      connectTimeout: 10000
+    };
+    console.log(`Connecting to MySQL at ${cfg.host}:${cfg.port}/${cfg.database}`);
+    return cfg;
+  }
+
+  console.log('No MySQL env vars configured — database features will not work.');
+  return {
+    host: 'localhost',
+    port: 3306,
+    user: 'root',
+    password: '',
+    database: 'finsight',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    dateStrings: true
+    dateStrings: true,
+    connectTimeout: 10000
   };
-
-  if (process.env.MYSQL_URL || process.env.MYSQL_HOST) {
-    console.log(`Connecting to MySQL at ${config.host}:${config.port}/${config.database} as ${config.user}`);
-  }
-
-  return config;
 }
 
 const pool = mysql.createPool(getDbConfig());
@@ -47,18 +64,24 @@ const pool = mysql.createPool(getDbConfig());
 async function initializeSchema() {
   let conn;
   try {
-    conn = await mysql.createConnection({ ...getDbConfig(), multipleStatements: true });
+    conn = await pool.getConnection();
     const schemaPath = path.join(__dirname, 'database', 'schema_railway.sql');
     if (fs.existsSync(schemaPath)) {
       const sql = fs.readFileSync(schemaPath, 'utf8');
-      await conn.query(sql);
+      const statements = sql
+        .split(';')
+        .map(s => s.trim())
+        .filter(s => s.length > 0 && !s.startsWith('--') && !s.startsWith('CREATE DATABASE') && !s.startsWith('USE '));
+      for (const stmt of statements) {
+        await conn.execute(stmt);
+      }
       console.log('Database schema initialized successfully');
     }
   } catch (err) {
     console.error('Schema initialization error:', err.message);
   } finally {
     if (conn) {
-      try { await conn.end(); } catch {}
+      try { conn.release(); } catch {}
     }
   }
 }
