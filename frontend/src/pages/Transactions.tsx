@@ -8,7 +8,6 @@ import {
   Search, 
   Trash2, 
   RotateCcw, 
-  Download, 
   FileText, 
   AlertCircle,
   X,
@@ -92,12 +91,42 @@ export const Transactions: React.FC = () => {
   });
 
   const exportPdfMutation = useMutation({
-    mutationFn: () => ReportService.generate(),
-    onSuccess: (data) => {
-      toast.success(`PDF report generated successfully! File saved: ${data.path}`);
+    mutationFn: () => ReportService.downloadPdf(),
+    onSuccess: async (blobData: any) => {
+      try {
+        if ('showSaveFilePicker' in window) {
+          const handle = await (window as any).showSaveFilePicker({
+            suggestedName: `finsight_statement_${new Date().toISOString().slice(0, 10)}.pdf`,
+            types: [{
+              description: 'PDF Document',
+              accept: {
+                'application/pdf': ['.pdf'],
+              },
+            }],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blobData);
+          await writable.close();
+          toast.success('PDF statement saved successfully!');
+        } else {
+          const url = window.URL.createObjectURL(new Blob([blobData], { type: 'application/pdf' }));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `finsight_statement_${new Date().toISOString().slice(0, 10)}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          toast.success('PDF statement downloaded successfully!');
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error(err);
+          toast.error('Failed to save PDF statement.');
+        }
+      }
     },
     onError: () => {
-      toast.error('Failed to export PDF.');
+      toast.error('Failed to download PDF statement.');
     }
   });
 
@@ -113,35 +142,7 @@ export const Transactions: React.FC = () => {
     return matchesSearch && matchesType;
   });
 
-  // Export CSV
-  const handleExportCsv = () => {
-    if (filtered.length === 0) {
-      toast.error('No transactions to export.');
-      return;
-    }
-    const headers = ['ID', 'Date', 'Type', 'Category', 'Description', 'Amount', 'Currency'];
-    const rows = filtered.map(tx => [
-      tx.id,
-      tx.transaction_date,
-      tx.type,
-      tx.category_name,
-      tx.description || '',
-      tx.amount,
-      tx.currency
-    ]);
 
-    const escapeCsv = (val: any) => `"${String(val).replace(/"/g, '""')}"`;
-    const csvContent = [headers.join(','), ...rows.map(e => e.map(escapeCsv).join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `finSight_transactions_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('CSV export completed.');
-  };
 
   const fmt = (val: number) => convertCurrency(val, cur, rates);
 
@@ -163,13 +164,7 @@ export const Transactions: React.FC = () => {
             <FileText className="w-4 h-4 text-purple-400" />
             <span>Export PDF</span>
           </button>
-          <button
-            onClick={handleExportCsv}
-            className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-slate-300 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-800 transition-all cursor-pointer"
-          >
-            <Download className="w-4 h-4 text-emerald-400" />
-            <span>Export CSV</span>
-          </button>
+
         </div>
       </div>
 

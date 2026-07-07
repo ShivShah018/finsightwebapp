@@ -231,4 +231,11 @@ export const ReportService = {
     const res = await apiClient.post<{ path: string; message: string }>('/report/generate', {}, { params });
     return res.data;
   },
+  downloadPdf: async () => {
+    const res = await apiClient.post('/report/generate', {}, {
+      params: { download: 'true' },
+      responseType: 'blob'
+    });
+    return res.data;
+  }
 };
