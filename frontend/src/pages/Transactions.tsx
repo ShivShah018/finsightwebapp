@@ -58,6 +58,7 @@ export const Transactions: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
       toast.success('Transaction deleted (can be restored)');
     },
     onError: () => {
@@ -70,6 +71,7 @@ export const Transactions: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
       toast.success('Transaction restored!');
     },
     onError: () => {
@@ -82,6 +84,7 @@ export const Transactions: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
       toast.success('Transaction updated!');
       setEditingTx(null);
     },

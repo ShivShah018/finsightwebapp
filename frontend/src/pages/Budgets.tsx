@@ -34,7 +34,7 @@ export const Budgets: React.FC = () => {
   });
 
   const { data: categories } = useQuery({
-    queryKey: ['categories'],
+    queryKey: ['categories', 'expense'],
     queryFn: () => CategoryService.getAll('expense'),
   });
 

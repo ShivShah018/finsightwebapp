@@ -78,6 +78,7 @@ export const Dashboard: React.FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['budgets'] });
       toast.success('Transaction created!');
       setShowAddModal(false);
       // Reset form
