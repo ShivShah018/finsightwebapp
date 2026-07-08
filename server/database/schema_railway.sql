@@ -90,3 +90,16 @@ CREATE TABLE IF NOT EXISTS budget_limits (
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
     UNIQUE KEY uq_user_category_budget (user_id, category_id)
 ) ENGINE=InnoDB;
+
+-- -----------------------------------------------------------
+-- 6. PASSWORD RESETS
+-- -----------------------------------------------------------
+CREATE TABLE IF NOT EXISTS password_resets (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    user_id       INT             NOT NULL,
+    token         VARCHAR(255)    NOT NULL,
+    expires_at    TIMESTAMP       NOT NULL,
+    created_at    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_token (token)
+) ENGINE=InnoDB;

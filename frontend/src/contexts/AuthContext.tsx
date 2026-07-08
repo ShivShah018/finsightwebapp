@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       toast.success('Registration successful!');
     } catch (error: any) {
-      const errorMsg = error.response?.data?.detail || 'Registration failed. Try a different email.';
+      const errorMsg = error.response?.data?.detail || 'Unable to connect to server. Please try again.';
       toast.error(errorMsg);
       throw error;
     } finally {
