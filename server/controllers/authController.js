@@ -65,7 +65,13 @@ const authController = {
         connection.release();
       }
       console.error('Register error:', error);
-      return res.status(500).json({ detail: 'Internal server error' });
+      return res.status(500).json({
+        detail: error.message,
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage
+      });
     }
   },
 
@@ -103,7 +109,13 @@ const authController = {
       });
     } catch (error) {
       console.error('Login error:', error);
-      return res.status(500).json({ detail: 'Internal server error' });
+      return res.status(500).json({
+        detail: error.message,
+        code: error.code,
+        errno: error.errno,
+        sqlState: error.sqlState,
+        sqlMessage: error.sqlMessage
+      });
     }
   },
 
