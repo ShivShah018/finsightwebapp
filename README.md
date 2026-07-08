@@ -268,6 +268,56 @@ The Python ML service runs as an isolated subprocess spawned by Express.js. Comm
 
 This keeps Node.js free of Python dependencies while leveraging scikit-learn. The Python environment is at `backend/.venv/`.
 
+## ML Evaluation
+
+The evaluation pipeline in `server/ml/improve_portfolio.py` measures ML model performance against the seeded dataset (319 transactions, 755 days). It compares 7 regression models with proper time-series validation.
+
+### Methodology
+
+- **Data**: 264 expense transactions aggregated to 747 daily training samples
+- **Features**: 29 engineered features (lag, rolling window, EMA, calendar, category one-hot)
+- **Validation**: TimeSeriesSplit (k=5) + holdout (last 20%) — zero data leakage
+- **Outlier treatment**: IQR winsorization caps extreme daily spending values
+- **Scaling**: RobustScaler (median/IQR, unaffected by outliers)
+
+### Model Comparison
+
+| Model | CV R² | MAE | MAPE |
+|---|---|---|---|
+| LinearRegression | −1.44 | 140.79 | 78.7% |
+| Ridge | −0.60 | 126.59 | 73.8% |
+| Lasso | −0.59 | 129.70 | 74.0% |
+| ElasticNet | −0.59 | 130.09 | 75.3% |
+| DecisionTree | +0.29 | 71.27 | 43.1% |
+| **RandomForest** | **+0.53** | **75.82** | **34.5%** |
+| GradientBoosting | +0.46 | 77.52 | 36.5% |
+
+**Selected**: RandomForest — holdout R² = 0.548, MAE = Rs.71.39, MAPE = 36.6%, inference = 11.7ms.
+
+### K-Means Clustering
+
+- 9 engineered features (log-amount, amount percentile, category density, calendar)
+- Optimal K = 10 (by silhouette: 0.304, Davies-Bouldin: 1.27)
+- PCA: 49.4% variance in 2D projection
+
+### Budget Recommendation
+
+Historical percentile-based model (Mean + 1 Std): 78.1% average coverage across 9 spending categories.
+
+### How to Rerun
+
+```bash
+# 1. Export dataset from the running backend
+#    (requires seeded database with user_id=1)
+curl -s -H "Authorization: Bearer <token>" \
+  http://localhost:8000/insights/all > server/ml/all_data.json
+
+# 2. Run the evaluation
+python server/ml/improve_portfolio.py server/ml/all_data.json
+
+# 3. Full report at docs/ML_EVALUATION_REPORT.md
+```
+
 ## Screenshots
 
 | Login | Dashboard |
