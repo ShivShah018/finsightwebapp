@@ -63,3 +63,8 @@ backend/uv.lock
 
 # Runtime logs
 server_*.txt
+
+login.json
+-w/
+
+-w
